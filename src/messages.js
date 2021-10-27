@@ -12,6 +12,7 @@ const status = {
 
 const usersMessages = {
   emailNotUnic: 'Email already registered',
+  userInvalid: 'Invalid entries. Try again.',
 };
 
 module.exports = { status, usersMessages };
