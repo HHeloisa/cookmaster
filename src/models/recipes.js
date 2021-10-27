@@ -7,4 +7,10 @@ const create = async (name, ingredients, preparation, _id) => {
   return { name, ingredients, preparation, userId: _id, _id: recipe.insertedId };
 };
 
+const getAll = async () => {
+  const db = await connection();
+  const allRecipes = await db.collection('products').find().toArray();
+  return allRecipes;
+};
+
 module.exports = { create };
