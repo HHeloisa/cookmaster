@@ -21,9 +21,10 @@ const loginMessages = {
 };
 
 const authMessages = {
-  notPermited: 'You dont have the permission to acess this resource',
+  jwt: 'jwt malformed',
+  /* notPermited: 'You dont have the permission to acess this resource',
   notFoundUser: 'Error on the search for token user',
-  tokenNotFound: 'Token not found',
+  tokenNotFound: 'Token not found', */
 };
 
 module.exports = { status, usersMessages, loginMessages, authMessages };
