@@ -1,6 +1,6 @@
 const rescue = require('express-rescue');
 const recipesService = require('../services/recipes');
-const { status, recipesMessages } = require('../messages');
+const { status } = require('../messages');
 
 const create = async (req, res) => {
   try {
@@ -22,7 +22,7 @@ const getRecipeById = rescue(async (req, res) => {
   const { id } = req.params;
   const { error, findedRecipe } = await recipesService.getRecipeById(id);
   if (error) {
-    return res.status(status.notFound).json({ message: recipesMessages.notFound });
+    return res.status(error.status).json({ message: error.message });
   }
   return res.status(status.sucess).json(findedRecipe);
 });
