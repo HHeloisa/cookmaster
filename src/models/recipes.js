@@ -9,8 +9,8 @@ const create = async (name, ingredients, preparation, _id) => {
 
 const getAll = async () => {
   const db = await connection();
-  const allRecipes = await db.collection('products').find().toArray();
+  const allRecipes = await db.collection('recipes').find().toArray();
   return allRecipes;
 };
 
-module.exports = { create };
+module.exports = { create, getAll };
