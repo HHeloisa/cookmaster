@@ -17,7 +17,7 @@ const usersMessages = {
 
 const loginMessages = {
   invalidData: 'All fields must be filled',
-  incorretLogin: 'Incorret username or password',
+  incorretLogin: 'Incorrect username or password',
 };
 
 const authMessages = {

@@ -6,15 +6,15 @@ async function userLogin(req, res) {
   const { email, password } = req.body;
   const userDB = await userModel.findByEmail(email);
   console.log(userDB);
-  const { _id, role } = userDB;
-  if (!_id || userDB.password !== password) {
+  if (!userDB || userDB.password !== password) {
     return res
     .status(status.unauth)
     .json({ message: loginMessages.incorretLogin });
   }
-
+  const { _id, role } = userDB;
+  
   const token = generateToken(_id, email, role);
-  return res.status(status.create).json({ token });
+  return res.status(status.sucess).json({ token });
 }
 
 module.exports = { userLogin };

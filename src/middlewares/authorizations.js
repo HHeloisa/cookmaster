@@ -36,7 +36,7 @@ async function verifyToken(req, res, next) {
   }
 }
 
-async function verifyAdmin(req, res, next) {
+/* async function verifyAdmin(req, res, next) {
   const { username } = req.user;
   if (username !== 'admin') {
     return res
@@ -44,5 +44,5 @@ async function verifyAdmin(req, res, next) {
     .json({ code: codes.invalidData, message: authMessages.notPermited });
   }
   next();
-}
-module.exports = { verifyToken, generateToken, verifyAdmin };
+} */
+module.exports = { verifyToken, generateToken /* verifyAdmin */ };
