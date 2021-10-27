@@ -1,6 +1,6 @@
 const rescue = require('express-rescue');
 const recipesService = require('../services/recipes');
-const { status } = require('../messages');
+const { status, recipesMessages } = require('../messages');
 
 const create = async (req, res) => {
   try {
@@ -18,4 +18,13 @@ const getAll = rescue(async (req, res) => {
   return res.status(status.sucess).json(allRecipes);
 });
 
-module.exports = { create, getAll };
+const getRecipeById = rescue(async (req, res) => {
+  const { id } = req.params;
+  const { error, findedRecepie } = await recipesService.getRecipeById(id);
+  if (error) {
+    return res.status(status.notFound).json({ message: recipesMessages.notFound });
+  }
+  return res.status(status.sucess).json(findedRecepie);
+});
+
+module.exports = { create, getAll, getRecipeById };
