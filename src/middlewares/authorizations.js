@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const userModel = require('../models/users');
+const usersModel = require('../models/users');
 const { authMessages, status } = require('../messages');
 
 const segredo = 'senhaUltraSecreta';
@@ -15,34 +15,24 @@ function generateToken(_id, email, role) {
   return token;
 }
 
-async function verifyToken(req, res, next) {
-  const token = req.headers.authorization;
-  if (!token) {
-    return res
-    .status(status.unauth).json({ message: authMessages.jwt });
-  } 
+const verifyToken = async (req, res, next) => {
   try {
+    const token = req.headers.authorization;
+    console.log(token);
+    if (!token) {
+      return res.status(status.unauth).json({ message: authMessages.jwt });
+    } 
     const decoded = jwt.verify(token, segredo);
-    const userDB = await userModel.findByEmail(decoded.email);
+    if (!decoded) return res.status(status.unauth).json({ message: authMessages.jwt });
+    const userDB = await usersModel.findByEmail(decoded.email);
+    console.log(userDB);
     if (!userDB) {
       return res
-        .status(status.unauth)
-        .json({ message: authMessages.jwt });
+      .status(status.unauth).json({ message: authMessages.jwt });
     }
     req.user = userDB;
     next();
-  } catch (err) {
-    return res.status(500).json({ message: err.message });
-  }
-}
+  } catch (error) { res.status(status.unauth).json({ message: authMessages.jwt }); }
+};
 
-/* async function verifyAdmin(req, res, next) {
-  const { username } = req.user;
-  if (username !== 'admin') {
-    return res
-    .status(status.forbidden)
-    .json({ code: codes.invalidData, message: authMessages.notPermited });
-  }
-  next();
-} */
-module.exports = { verifyToken, generateToken /* verifyAdmin */ };
+module.exports = { verifyToken, generateToken };

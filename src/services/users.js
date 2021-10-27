@@ -7,7 +7,6 @@ const create = async (name, password, email) => {
     return { error: { code: status.conflict, message: usersMessages.emailNotUnic } };
   }
   const newUser = await usersModel.create(name, email, password);
-  console.log('newUserService', newUser);
   return { newUser };
 };
 
