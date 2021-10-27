@@ -1,11 +1,11 @@
+const rescue = require('express-rescue');
 const userModel = require('../models/users');
 const { status, loginMessages } = require('../messages');
 const { generateToken } = require('../middlewares/authorizations');
 
-async function userLogin(req, res) {
+const userLogin = rescue(async (req, res) => {
   const { email, password } = req.body;
   const userDB = await userModel.findByEmail(email);
-  console.log(userDB);
   if (!userDB || userDB.password !== password) {
     return res
     .status(status.unauth)
@@ -15,6 +15,6 @@ async function userLogin(req, res) {
   
   const token = generateToken(_id, email, role);
   return res.status(status.sucess).json({ token });
-}
+});
 
 module.exports = { userLogin };
