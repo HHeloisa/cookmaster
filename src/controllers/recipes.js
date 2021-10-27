@@ -20,11 +20,11 @@ const getAll = rescue(async (req, res) => {
 
 const getRecipeById = rescue(async (req, res) => {
   const { id } = req.params;
-  const { error, findedRecepie } = await recipesService.getRecipeById(id);
+  const { error, findedRecipe } = await recipesService.getRecipeById(id);
   if (error) {
     return res.status(status.notFound).json({ message: recipesMessages.notFound });
   }
-  return res.status(status.sucess).json(findedRecepie);
+  return res.status(status.sucess).json(findedRecipe);
 });
 
 module.exports = { create, getAll, getRecipeById };
