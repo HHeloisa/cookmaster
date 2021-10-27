@@ -6,4 +6,10 @@ const create = async (name, email, password) => {
   return { name, email, role: 'user', _id: newUser.insertedId };
 };
 
-module.exports = { create };
+const findByEmail = async (email) => {
+  const db = await connection();
+  const usernameDB = await db.collection('users').findOne({ email });
+  return usernameDB;
+};
+
+module.exports = { create, findByEmail };
