@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 const userModel = require('../models/users');
-const { codes, authMessages, status } = require('../messages');
+const { authMessages, status } = require('../messages');
 
 const segredo = 'senhaUltraSecreta';
 
@@ -19,20 +19,20 @@ async function verifyToken(req, res, next) {
   const token = req.headers.authorization;
   if (!token) {
     return res
-    .status(status.unauth).json({ message: authMessages.tokenNotFound });
+    .status(status.unauth).json({ message: authMessages.jwt });
   } 
   try {
     const decoded = jwt.verify(token, segredo);
-    const user = await userModel.findByEmail(decoded.email);
-    if (!user) {
+    const userDB = await userModel.findByEmail(decoded.email);
+    if (!userDB) {
       return res
         .status(status.unauth)
-        .json({ message: authMessages.notFoundUser });
+        .json({ message: authMessages.jwt });
     }
-    req.user = user;
+    req.user = userDB;
     next();
   } catch (err) {
-    return res.status(500).json({ code: codes.invalidData, message: err.message });
+    return res.status(500).json({ message: err.message });
   }
 }
 
