@@ -1,4 +1,4 @@
-// const rescue = require('express-rescue');
+const rescue = require('express-rescue');
 const recipesService = require('../services/recipes');
 const { status } = require('../messages');
 
@@ -13,4 +13,9 @@ const create = async (req, res) => {
   }
 };
 
-module.exports = { create };
+const getAll = rescue(async (req, res) => {
+  const allRecipes = await recipesService.getAll();
+  return res.status(status.sucess).json(allRecipes);
+});
+
+module.exports = { create, getAll };
