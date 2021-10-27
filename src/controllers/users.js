@@ -1,14 +1,13 @@
 const rescue = require('express-rescue');
-const usersService = require('../services/users');
+const usersServices = require('../services/users');
 const { status } = require('../messages');
 
-const createUser = rescue(async (req, res) => {
-  
-  const { name, email, password } = req.body;
-  const { error, createdUser } = await usersService.create(name, password, email);
-  if (error) return res.status(error.code).json({ error.message });
-  return res.status(status.create).json({ createdUser });
-
+const create = rescue(async (req, res) => {
+    const { name, email, password } = req.body;
+  const { error, newUser } = await usersServices.create(name, password, email);
+  console.log('newUserController', newUser);
+  if (error) return res.status(error.code).json({ message: error.message });
+  return res.status(status.create).json({ user: newUser });
 });
 
-module.exports = { createUser };
+module.exports = { create };
