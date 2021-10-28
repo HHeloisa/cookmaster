@@ -20,16 +20,29 @@ const getRecipeById = async (id) => {
 };
 
 const editRecipe = async (id, name, ingredients, preparation) => {
-  const editedRecipe = await recipeModel.editRecipe(id, name, ingredients, preparation);
-  if (!editedRecipe) {
+  console.log('entrei no sercie');
+  const allInfoRecipe = await recipeModel.editRecipe(id, name, ingredients, preparation);
+  if (!allInfoRecipe) {
     return { error: { status: 404, message: recipesMessages.notFound } };
   }
-  return { editedRecipe };
+  console.log('allInfoRecipeServiceRetorno', allInfoRecipe);
+  return { allInfoRecipe };
 };
 
 const deleteRecipe = async (id) => {
   const deletedOne = await recipeModel.deleteRecipe(id);
+  if (!deletedOne) {
+    return { error: { status: 404, message: recipesMessages.notFound } };
+  }
   return { deletedOne };
 };
 
-module.exports = { create, getAll, getRecipeById, editRecipe, deleteRecipe };
+async function addImage(id, path) {
+  const recipeWithImg = await recipeModel.addImage(id, path);
+  if (!recipeWithImg) {
+    return { error: { status: 404, message: recipesMessages.notFound } };
+  }
+  return { recipeWithImg };
+}
+
+module.exports = { create, getAll, getRecipeById, editRecipe, deleteRecipe, addImage };
