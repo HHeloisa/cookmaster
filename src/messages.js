@@ -1,6 +1,7 @@
 const status = {
   sucess: 200,
   create: 201,
+  noContent: 204,
   badRequest: 400,
   unauth: 401,
   forbidden: 403,

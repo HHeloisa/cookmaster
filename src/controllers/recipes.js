@@ -32,18 +32,20 @@ const editRecipe = rescue(async (req, res) => {
   const { userDB } = req.user;
   const { name, ingredients, preparation } = req.body;
   const params = { id, name, ingredients, preparation, userDB };
-  const theRecipe = await recipesService.editRecipe(params);
+  const { error, theRecipe } = await recipesService.editRecipe(params);
   if (!theRecipe) {
-    return res.status(500).json({ message: 'receita não encontrada' }); // notFound
+    return res.status(error.status).json({ message: error.message });
   }
   return res.status(status.sucess).json(theRecipe);
 });
 
 const deleteRecipe = rescue(async (req, res) => {
       const { id } = req.params;
-      const deletedOne = await recipesService.deleteProduct(id);
-      
-      return res.status(200).json(deletedOne);
+      const { error } = await recipesService.deleteRecipe(id);
+      if (error) {
+        return res.status(error.status).json({ message: error.message });
+      }
+      return res.status(status.noContent).json({});
   });
 
 module.exports = { create, getAll, getRecipeById, editRecipe, deleteRecipe };
