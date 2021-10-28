@@ -22,6 +22,7 @@ const getRecipeById = async (id) => {
 };
 
 const editRecipe = async (id, name, ingredients, preparation) => {
+  console.log('entrei no model');
   if (!ObjectId.isValid(id)) return null;
   
   const db = await connection();
@@ -29,14 +30,31 @@ const editRecipe = async (id, name, ingredients, preparation) => {
     .updateOne({ _id: ObjectId(id) }, { $set: { name, ingredients, preparation } });
   
   const allInfoRecipe = await getRecipeById(ObjectId(id));
+  console.log('allInfoRecipeModel', allInfoRecipe);
    return allInfoRecipe;
 };
 
 const deleteRecipe = async (id) => {
-    if (!ObjectId.isValid(id)) return null;
-
-    const db = await connection();
-    await db.collection('recipes').deleteOne({ _id: ObjectId(id) });
+  if (!ObjectId.isValid(id)) return null;
+  const db = await connection();
+  await db.collection('recipes').deleteOne({ _id: ObjectId(id) });
+  return true;
 };
 
-module.exports = { create, getAll, getRecipeById, editRecipe, deleteRecipe };
+async function addImage(id, path) {
+  if (!ObjectId.isValid(id)) return null;
+  const db = await connection();
+  const data = await getRecipeById(id);
+  const { name, ingredients, preparation, userId } = data;
+  await db.collection('recipes').updateOne({ _id: ObjectId(id) }, { $set: {
+      name,
+      ingredients,
+      preparation,
+      userId,
+      image: `localhost:3000/${path}`,
+  } });
+  const recipeWithImg = await getRecipeById(ObjectId(id));
+  return recipeWithImg;
+}
+
+module.exports = { create, getAll, getRecipeById, editRecipe, deleteRecipe, addImage };
