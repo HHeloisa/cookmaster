@@ -6,6 +6,6 @@ const { validRecepies } = require('../middlewares/validateRecepies');
 router.post('/', verifyToken, validRecepies, recepiesController.create);
 router.get('/', recepiesController.getAll);
 router.get('/:id', recepiesController.getRecipeById);
-router.put('/:id', recepiesController.editRecipe);
+router.put('/:id', verifyToken, validRecepies, recepiesController.editRecipe);
 
 module.exports = router;
