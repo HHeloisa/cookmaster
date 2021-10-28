@@ -39,4 +39,11 @@ const editRecipe = rescue(async (req, res) => {
   return res.status(status.sucess).json(theRecipe);
 });
 
-module.exports = { create, getAll, getRecipeById, editRecipe };
+const deleteRecipe = rescue(async (req, res) => {
+      const { id } = req.params;
+      const deletedOne = await recipesService.deleteProduct(id);
+      
+      return res.status(200).json(deletedOne);
+  });
+
+module.exports = { create, getAll, getRecipeById, editRecipe, deleteRecipe };
