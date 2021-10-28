@@ -21,18 +21,20 @@ const getRecipeById = async (id) => {
   return findedRecipe;
 };
 
-const editRecipe = async (params) => {
-  const { id, name, ingredients, preparation } = params;
+const editRecipe = async (id, name, ingredients, preparation) => {
   if (!ObjectId.isValid(id)) return null;
+  
   const db = await connection();
   await db.collection('recipes')
     .updateOne({ _id: ObjectId(id) }, { $set: { name, ingredients, preparation } });
-  const allInfoRecipe = await getRecipeById(id);
-    return allInfoRecipe;
+  
+  const allInfoRecipe = await getRecipeById(ObjectId(id));
+   return allInfoRecipe;
 };
 
 const deleteRecipe = async (id) => {
     if (!ObjectId.isValid(id)) return null;
+
     const db = await connection();
     await db.collection('recipes').deleteOne({ _id: ObjectId(id) });
 };

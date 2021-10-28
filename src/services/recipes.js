@@ -19,16 +19,12 @@ const getRecipeById = async (id) => {
  return { findedRecipe };
 };
 
-const editRecipe = async (params) => {
-  /* const { id, name, ingredients, preparation , userDB } = params;
-  const { _id } = userDB;
-  // fazer validação se é admin, ou se é a pessoa que cadastrou a receita
-  const theRecipeDB = await recipeModel.getRecipeById(id);
-  if (theRecipeDB.userId !== _id && _id !== 'admin') {
-    return res.status
-  }  */
-  const editedRecipe = await recipeModel.editRecipe(params);
-  return editedRecipe;
+const editRecipe = async (id, name, ingredients, preparation) => {
+  const editedRecipe = await recipeModel.editRecipe(id, name, ingredients, preparation);
+  if (!editedRecipe) {
+    return { error: { status: 404, message: recipesMessages.notFound } };
+  }
+  return { editedRecipe };
 };
 
 const deleteRecipe = async (id) => {

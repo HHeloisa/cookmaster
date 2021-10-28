@@ -27,20 +27,33 @@ const getRecipeById = rescue(async (req, res) => {
   return res.status(status.sucess).json(findedRecipe);
 });
 
-const editRecipe = rescue(async (req, res) => {
-  const { id } = req.params;
-  const { userDB } = req.user;
-  const { name, ingredients, preparation } = req.body;
-  const params = { id, name, ingredients, preparation, userDB };
-  const theRecipe = await recipesService.editRecipe(params);
+const editRecipe = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, ingredients, preparation } = req.body;
 
-  return res.status(status.sucess).json(theRecipe);
-});
+    const { error, editedRecipe } = await recipesService
+      .editRecipe(id, name, ingredients, preparation);
+    
+    if (error) {
+      const { message } = error;
+      return res.status(error.status).json({ message });
+    }
 
-const deleteRecipe = rescue(async (req, res) => {
-      const { id } = req.params;
-      await recipesService.deleteRecipe(id);
-      return res.status(204).json({});
-  });
+    return res.status(status.sucess).json(editedRecipe);
+  } catch (error) {
+    return res.status(500).json({ message: 'deu ruim mesmo' });
+  }
+};
+
+const deleteRecipe = async (req, res) => {
+  try {
+    const { id } = req.params;
+    await recipesService.deleteRecipe(id);
+    return res.status(204).json({});
+  } catch (error) {
+    return res.status(500).json({ message: 'deu ruim mesmo' });
+  }
+  };
 
 module.exports = { create, getAll, getRecipeById, editRecipe, deleteRecipe };
