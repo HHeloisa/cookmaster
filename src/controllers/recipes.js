@@ -28,32 +28,44 @@ const getRecipeById = rescue(async (req, res) => {
 });
 
 const editRecipe = async (req, res) => {
-  try {
+    console.log('entrei no controller');
     const { id } = req.params;
     const { name, ingredients, preparation } = req.body;
 
-    const { error, editedRecipe } = await recipesService
+    const { error, allInfoRecipe } = await recipesService
       .editRecipe(id, name, ingredients, preparation);
     
     if (error) {
       const { message } = error;
       return res.status(error.status).json({ message });
     }
-
-    return res.status(status.sucess).json(editedRecipe);
-  } catch (error) {
-    return res.status(500).json({ message: 'deu ruim mesmo' });
-  }
+    console.log('allInfoRecipeController', allInfoRecipe);
+    return res.status(status.sucess).json(allInfoRecipe);
 };
 
 const deleteRecipe = async (req, res) => {
   try {
     const { id } = req.params;
-    await recipesService.deleteRecipe(id);
-    return res.status(204).json({});
+    const { error } = await recipesService.deleteRecipe(id);
+    if (error) {
+      const { message } = error;
+      return res.status(error.status).json({ message });
+    }
+    return res.status(status.noContent).json({});
   } catch (error) {
     return res.status(500).json({ message: 'deu ruim mesmo' });
   }
   };
 
-module.exports = { create, getAll, getRecipeById, editRecipe, deleteRecipe };
+const addImage = async (req, res) => {
+  const { id } = req.params;
+  const { path } = req.file;
+  const { error, recipeWithImg } = await recipesService.addImage(id, path);
+  if (error) {
+    const { message } = error;
+    return res.status(error.status).json({ message });
+  }
+  return res.status(200).json(recipeWithImg);
+};
+
+module.exports = { create, getAll, getRecipeById, editRecipe, deleteRecipe, addImage };
