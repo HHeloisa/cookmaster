@@ -10,4 +10,9 @@ const create = async (name, password, email) => {
   return { newUser };
 };
 
-module.exports = { create };
+const createAdmin = async (name, email, password) => {
+  const newAdmin = await usersModel.createAdmin(name, email, password);
+  return newAdmin;
+};
+
+module.exports = { create, createAdmin };

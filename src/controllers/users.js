@@ -9,4 +9,10 @@ const create = rescue(async (req, res) => {
   return res.status(status.create).json({ user: newUser });
 });
 
-module.exports = { create };
+const createAdmin = rescue(async (req, res) => {
+  const { name, email, password } = req.body;
+  const newAdmin = await usersServices.createAdmin(name, email, password);
+  return res.status(status.create).json({ user: newAdmin });
+});
+
+module.exports = { create, createAdmin };

@@ -1,4 +1,3 @@
-const bodyParser = require('body-parser');
 const express = require('express');
 const path = require('path'); 
 const usersRoutes = require('../routes/users');
@@ -6,7 +5,7 @@ const loginRoutes = require('../routes/login');
 const recipesRoutes = require('../routes/recipes');
 
 const app = express();
-app.use(bodyParser.json());
+app.use(express.json());
 
 app.use('/users', usersRoutes);
 app.use('/login', loginRoutes);

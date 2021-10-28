@@ -41,4 +41,4 @@ async function validateAdminOrOwnerRecipe(req, res, next) {
   next(); 
 }
 
-module.exports = { validateBodyRecepies, validateAdminOrOwnerRecipe };
+module.exports = { validateBodyRecepies, validateAdminOrOwnerRecipe, validateAdmin };

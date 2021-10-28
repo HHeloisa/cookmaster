@@ -9,8 +9,6 @@ router.get('/', recepiesController.getAll);
 
 router.get('/:id', recepiesController.getRecipeById);
 
-/* router.use(verifyToken); */
-
 router.post('/', 
   verifyToken,
   validateBodyRecepies,

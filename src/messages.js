@@ -14,6 +14,7 @@ const status = {
 const usersMessages = {
   emailNotUnic: 'Email already registered',
   userInvalid: 'Invalid entries. Try again.',
+  onlyAdmin: 'Only admins can register new admins',
 };
 
 const loginMessages = {
