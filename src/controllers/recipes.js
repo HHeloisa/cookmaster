@@ -27,4 +27,9 @@ const getRecipeById = rescue(async (req, res) => {
   return res.status(status.sucess).json(findedRecipe);
 });
 
-module.exports = { create, getAll, getRecipeById };
+const editRecipe = rescue(async (req, res) => {
+  const theRecipe = await recipesService.editRecipe();
+  return res.status(status.sucess).json({ theRecipe });
+});
+
+module.exports = { create, getAll, getRecipeById, editRecipe };
