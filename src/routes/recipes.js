@@ -1,32 +1,48 @@
 const router = require('express').Router();
+const multer = require('multer');
 const recepiesController = require('../controllers/recipes');
 const { verifyToken } = require('../middlewares/authorizations');
 const { validateBodyRecepies } = require('../middlewares/validateRecepies'); 
-/* validateEditRecipe ,  */ 
-
-router.post('/', 
-  verifyToken, 
-  validateBodyRecepies,
-  recepiesController.create);
+  /* validateAdminOrOwnerRecipe */ 
 
 router.get('/', recepiesController.getAll);
 
 router.get('/:id', recepiesController.getRecipeById);
 
-router.put('/:id', 
+/* router.use(verifyToken); */
+
+router.post('/', 
   verifyToken,
   validateBodyRecepies,
-  /* validateEditRecipe, */
-  recepiesController.editRecipe);
+  recepiesController.create);
 
-  router.put('/:id/image/', 
+router.put('/:id',
   verifyToken,
-  /* validateEditRecipe, */
-  recepiesController.addImage);
+  validateBodyRecepies,
+  /* validateAdminOrOwnerRecipe */
+  recepiesController.editRecipe);
 
 router.delete('/:id', 
   verifyToken,
-  /* validateEditRecipe, */
+  /* validateAdminOrOwnerRecipe, */
   recepiesController.deleteRecipe);
+
+  /* ========================================================= */
+  const storage = multer.diskStorage({
+    destination: (_req, _file, callback) => {
+    callback(null, './src/uploads/');
+    },
+    filename: (req, _file, callback) => {
+      const { id } = req.params;
+      callback(null, `${id}.jpeg`);
+    },
+  });
+
+  const uploadImage = multer({ storage });
+
+  router.put('/:id/image/', 
+  verifyToken,
+  uploadImage.single('image'),
+  recepiesController.addImage); 
 
 module.exports = router;
