@@ -28,8 +28,15 @@ const getRecipeById = rescue(async (req, res) => {
 });
 
 const editRecipe = rescue(async (req, res) => {
-  const theRecipe = await recipesService.editRecipe();
-  return res.status(status.sucess).json({ theRecipe });
+  const { id } = req.params;
+  const { userDB } = req.user;
+  const { name, ingredients, preparation } = req.body;
+  const params = { id, name, ingredients, preparation, userDB };
+  const theRecipe = await recipesService.editRecipe(params);
+  if (!theRecipe) {
+    return res.status(500).json({ message: 'receita não encontrada' }); // notFound
+  }
+  return res.status(status.sucess).json(theRecipe);
 });
 
 module.exports = { create, getAll, getRecipeById, editRecipe };
