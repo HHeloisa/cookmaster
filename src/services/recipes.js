@@ -19,4 +19,17 @@ const getRecipeById = async (id) => {
  return { findedRecipe };
 };
 
-module.exports = { create, getAll, getRecipeById };
+const editRecipe = async (params) => {
+  /* const { id, name, ingredients, preparation , userDB } = params;
+  const { _id } = userDB;
+  // fazer validação se é admin, ou se é a pessoa que cadastrou a receita
+  const theRecipeDB = await recipeModel.getRecipeById(id);
+  if (theRecipeDB.userId !== _id && _id !== 'admin') {
+    return res.status
+  }  */
+  const editedRecipe = await recipeModel.editRecipe(params);
+ 
+  return editedRecipe;
+};
+
+module.exports = { create, getAll, getRecipeById, editRecipe };
