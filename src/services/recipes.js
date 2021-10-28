@@ -28,20 +28,12 @@ const editRecipe = async (params) => {
     return res.status
   }  */
   const editedRecipe = await recipeModel.editRecipe(params);
-  if (!editedRecipe) {
-    return { error: { status: 404, message: recipesMessages.notFound } };
-  }
   return editedRecipe;
 };
 
 const deleteRecipe = async (id) => {
-  console.log('estou no service');
-  const deletedOne = await recipeModel.deleteProduct(id);
-  if (!deletedOne) {
-    return { error: { status: 404, message: recipesMessages.notFound } };
-  }
-  console.log(deletedOne);
-  return deletedOne;
+  const deletedOne = await recipeModel.deleteRecipe(id);
+  return { deletedOne };
 };
 
 module.exports = { create, getAll, getRecipeById, editRecipe, deleteRecipe };

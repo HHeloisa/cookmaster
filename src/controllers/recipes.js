@@ -32,20 +32,15 @@ const editRecipe = rescue(async (req, res) => {
   const { userDB } = req.user;
   const { name, ingredients, preparation } = req.body;
   const params = { id, name, ingredients, preparation, userDB };
-  const { error, theRecipe } = await recipesService.editRecipe(params);
-  if (!theRecipe) {
-    return res.status(error.status).json({ message: error.message });
-  }
+  const theRecipe = await recipesService.editRecipe(params);
+
   return res.status(status.sucess).json(theRecipe);
 });
 
 const deleteRecipe = rescue(async (req, res) => {
       const { id } = req.params;
-      const { error } = await recipesService.deleteRecipe(id);
-      if (error) {
-        return res.status(error.status).json({ message: error.message });
-      }
-      return res.status(status.noContent).json({});
+      await recipesService.deleteRecipe(id);
+      return res.status(204).json({});
   });
 
 module.exports = { create, getAll, getRecipeById, editRecipe, deleteRecipe };
