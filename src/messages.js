@@ -22,6 +22,7 @@ const loginMessages = {
 
 const authMessages = {
   jwt: 'jwt malformed',
+  missingToken: 'missing auth token',
 };
 
 const recipesMessages = { 

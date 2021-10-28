@@ -20,7 +20,7 @@ const verifyToken = async (req, res, next) => {
     const token = req.headers.authorization;
     console.log(token);
     if (!token) {
-      return res.status(status.unauth).json({ message: authMessages.jwt });
+      return res.status(status.unauth).json({ message: authMessages.missingToken });
     } 
     const decoded = jwt.verify(token, segredo);
     if (!decoded) return res.status(status.unauth).json({ message: authMessages.jwt });
