@@ -16,6 +16,7 @@ function generateToken(_id, email, role) {
 }
 
 const verifyToken = async (req, res, next) => {
+  console.log('estou verificando o token, por favor espera');
   try {
     const token = req.headers.authorization;
     if (!token) {
@@ -30,7 +31,7 @@ const verifyToken = async (req, res, next) => {
     }
     req.user = userDB;
     next();
-  } catch (error) { res.status(status.unauth).json({ message: authMessages.jwt }); }
+  } catch (error) { return res.status(status.unauth).json({ message: authMessages.jwt }); }
 };
 
 module.exports = { verifyToken, generateToken };
