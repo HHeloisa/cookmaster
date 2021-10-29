@@ -37,12 +37,12 @@ const deleteRecipe = async (id) => {
   return { deletedOne };
 };
 
-async function addImage(id, path) {
+const addImage = async (id, path) => {
   const recipeWithImg = await recipeModel.addImage(id, path);
   if (!recipeWithImg) {
     return { error: { status: 404, message: recipesMessages.notFound } };
   }
   return { recipeWithImg };
-}
+};
 
 module.exports = { create, getAll, getRecipeById, editRecipe, deleteRecipe, addImage };

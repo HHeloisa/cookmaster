@@ -2,16 +2,12 @@ const rescue = require('express-rescue');
 const recipesService = require('../services/recipes');
 const { status } = require('../messages');
 
-const create = async (req, res) => {
-  try {
+const create = rescue(async (req, res) => {
     const { name, ingredients, preparation } = req.body;
     const { _id } = req.user;    
     const newRecepie = await recipesService.create(name, ingredients, preparation, _id);
     return res.status(status.create).json({ recipe: newRecepie });
-  } catch (error) {
-    return res.status(500).json({ message: error.message });
-  }
-};
+});
 
 const getAll = rescue(async (req, res) => {
   const allRecipes = await recipesService.getAll();
@@ -27,7 +23,7 @@ const getRecipeById = rescue(async (req, res) => {
   return res.status(status.sucess).json(findedRecipe);
 });
 
-const editRecipe = async (req, res) => {
+const editRecipe = rescue(async (req, res) => {
     console.log('entrei no controller');
     const { id } = req.params;
     const { name, ingredients, preparation } = req.body;
@@ -41,10 +37,9 @@ const editRecipe = async (req, res) => {
     }
     console.log('allInfoRecipeController', allInfoRecipe);
     return res.status(status.sucess).json(allInfoRecipe);
-};
+});
 
-const deleteRecipe = async (req, res) => {
-  try {
+const deleteRecipe = rescue(async (req, res) => {
     const { id } = req.params;
     const { error } = await recipesService.deleteRecipe(id);
     if (error) {
@@ -52,12 +47,9 @@ const deleteRecipe = async (req, res) => {
       return res.status(error.status).json({ message });
     }
     return res.status(status.noContent).json({});
-  } catch (error) {
-    return res.status(500).json({ message: 'deu ruim mesmo' });
-  }
-  };
+  });
 
-const addImage = async (req, res) => {
+const addImage = rescue(async (req, res) => {
   const { id } = req.params;
   const { path } = req.file;
   const { error, recipeWithImg } = await recipesService.addImage(id, path);
@@ -66,6 +58,6 @@ const addImage = async (req, res) => {
     return res.status(error.status).json({ message });
   }
   return res.status(200).json(recipeWithImg);
-};
+});
 
 module.exports = { create, getAll, getRecipeById, editRecipe, deleteRecipe, addImage };
