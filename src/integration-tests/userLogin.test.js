@@ -5,6 +5,7 @@ const sinon = require('sinon');
 
 const { getMockConnection } = require("./connectionMock");
 const server = require('../api/app');
+const messages = require('../messages');
 
 const chaiHttp = require('chai-http');
 chai.use(chaiHttp);
@@ -28,11 +29,12 @@ describe('Valida a criação de um usuário em post /users', () => {
           "email": "hhackenhaar@gmail.com",
           "password": "444648"
         });
-      
-        after(async () => {
-          MongoClient.connect.restore();
-        });
     });
+
+    after(async () => {
+      MongoClient.connect.restore();
+    });
+
     it('Espera que o retorno em body seja um objeto com a propriedade "user"', () => {
       expect(response.body).to.be.an('object')
       expect(response.body).to.be.property('user');
@@ -60,5 +62,30 @@ describe('Valida a criação de um usuário em post /users', () => {
       expect(response).to.have.status(201);
     });
   });
-}); 
+
+  describe('Erro no cadastro de usuário', () => {
+    let response;
+
+    before(async () => {
+      const connectionMock = await getMockConnection();
+      sinon.stub(MongoClient, 'connect')
+      .resolves(connectionMock);
+
+    });
+
+    after(async () => {
+      MongoClient.connect.restore();
+    });
+
+    it('Retorna mensagem de erro se o body não possui name', async () => {
+      response = await chai.request(server)
+        .post('/users')
+        .send({ email: 'adelinojunior@gmail.com', password: '123456' });
+
+      expect(response).to.have.status(400);
+      expect(response.body).to.have.property('message');
+      expect(response.body.message).to.be.equal('Invalid entries. Try again.');
+    })
+  }); 
+});
 
