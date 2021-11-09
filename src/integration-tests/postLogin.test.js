@@ -41,6 +41,14 @@ describe.only('Valida a criação de um usuário em post /login', () => {
 
       expect(response.body).to.have.property('token');
       expect(response.body['token']).to.be.a('string');
+      ;
+    });
+    it('Espera que o status do login realizado seja 200', async () => {
+      response = await chai.request(server)
+      .post('/login')
+      .send({ email: 'hhackenhaar@gmail.com', password: '444648' });
+
+      expect(response).to.have.status(200)
     });
   });
   /* describe('Erro ao efetuar login', () => {
