@@ -11,7 +11,7 @@ const schemaUsers = Joi.object({
 const validRequireData = (req, res, next) => {
   const { error } = schemaUsers.validate(req.body);
   if (error) {
-    return res.status(status.badRequest).json({ message: usersMessages.userInvalid });
+    return res.status(status.badRequest).json({ message: usersMessages.invalidEntries });
   } 
   next();
 };
