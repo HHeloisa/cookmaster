@@ -19,16 +19,10 @@ const verifyToken = async (req, res, next) => {
   console.log('estou verificando o token, por favor espera');
   try {
     const token = req.headers.authorization;
-    if (!token) {
-      return res.status(status.unauth).json({ message: authMessages.missingToken });
-    } 
+    if (!token) return res.status(status.unauth).json({ message: authMessages.missingToken });
     const decoded = jwt.verify(token, segredo);
     if (!decoded) return res.status(status.unauth).json({ message: authMessages.jwt });
     const userDB = await usersModel.findByEmail(decoded.email);
-    if (!userDB) {
-      return res
-      .status(status.unauth).json({ message: authMessages.jwt });
-    }
     req.user = userDB;
     next();
   } catch (error) { return res.status(status.unauth).json({ message: authMessages.jwt }); }
