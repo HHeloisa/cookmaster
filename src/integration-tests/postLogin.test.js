@@ -4,6 +4,7 @@ const sinon = require('sinon');
 
 const { getMockConnection } = require("./connectionMock");
 const server = require('../api/app');
+const { loginMessages } = require('../messages');
 
 const chaiHttp = require('chai-http');
 chai.use(chaiHttp);
@@ -48,13 +49,21 @@ describe.only('Valida a criação de um usuário em post /login', () => {
       .post('/login')
       .send({ email: 'hhackenhaar@gmail.com', password: '444648' });
 
-      expect(response).to.have.status(200)
+      expect(response).to.have.status(200);
     });
   });
-  /* describe('Erro ao efetuar login', () => {
-    it('Retorna mensagem de erro se o body não possui email', async () => {});
-    it('Retorna mensagem de erro se o body não possui password', async () => {});
+  describe('Erro ao efetuar login', () => {
+    it('Retorna mensagem de erro e status 401 se o body não possui email', async () => {
+      response = await chai.request(server)
+      .post('/login')
+      .send({ password: '444648' });
+
+      expect(response.body).to.have.property('message');
+      expect(response.body.message).to.be.equal(loginMessages.invalidData);
+      expect(response).to.have.status(401);
+    });
+    /* it('Retorna mensagem de erro se o body não possui password', async () => {});
     it('Retorna mensagem de erro se o usuario não existe', async () => {});
-    it('Retorna mensagem de erro se o a senha não corresponde a do banco de dados', async () => {});
-  }) */
+    it('Retorna mensagem de erro se o a senha não corresponde a do banco de dados', async () => {}); */
+  })
 });
