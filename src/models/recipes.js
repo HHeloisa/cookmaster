@@ -22,7 +22,6 @@ const getRecipeById = async (id) => {
 };
 
 const editRecipe = async (id, name, ingredients, preparation) => {
-  console.log('entrei no model');
   if (!ObjectId.isValid(id)) return null;
   
   const db = await connection();
@@ -30,7 +29,6 @@ const editRecipe = async (id, name, ingredients, preparation) => {
     .updateOne({ _id: ObjectId(id) }, { $set: { name, ingredients, preparation } });
   
   const allInfoRecipe = await getRecipeById(ObjectId(id));
-  console.log('allInfoRecipeModel', allInfoRecipe);
    return allInfoRecipe;
 };
 

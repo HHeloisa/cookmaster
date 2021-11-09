@@ -14,6 +14,7 @@ const userLogin = rescue(async (req, res) => {
   const { _id, role } = userDB;
   
   const token = generateToken(_id, email, role);
+
   return res.status(status.sucess).json({ token });
 });
 
