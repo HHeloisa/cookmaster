@@ -52,10 +52,12 @@ describe('Valida a criação de um usuário em post /users', () => {
       expect(response.body.user['_id']).to.be.a('string');
     });
     it('Espera que o objeto "user" tenha a propriedade "role"', () => {
-     
       expect(response.body.user).to.be.property('role');
       expect(response.body.user['role']).to.be.a('string');
       expect(response.body.user.role).to.be.equal('user');
+    });
+    it('Espera que o status seja 201, create', () => {
+      expect(response).to.have.status(201);
     });
   });
 }); 
