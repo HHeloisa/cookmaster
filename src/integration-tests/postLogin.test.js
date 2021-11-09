@@ -62,8 +62,16 @@ describe.only('Valida a criação de um usuário em post /login', () => {
       expect(response.body.message).to.be.equal(loginMessages.invalidData);
       expect(response).to.have.status(401);
     });
-    /* it('Retorna mensagem de erro se o body não possui password', async () => {});
-    it('Retorna mensagem de erro se o usuario não existe', async () => {});
+    it('Retorna mensagem de erro e status 401 se o body não possui password', async () => {
+      response = await chai.request(server)
+      .post('/login')
+      .send({ email: 'hhackenhaar@gmail.com', password: '444648' });
+
+      expect(response.body).to.have.property('message');
+      expect(response.body.message).to.be.equal(loginMessages.invalidData);
+      expect(response).to.have.status(401);
+    });
+     /* it('Retorna mensagem de erro se o usuario não existe', async () => {});
     it('Retorna mensagem de erro se o a senha não corresponde a do banco de dados', async () => {}); */
   })
 });
