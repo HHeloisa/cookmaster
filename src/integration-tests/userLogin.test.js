@@ -80,12 +80,13 @@ describe('Valida a criação de um usuário em post /users', () => {
     it('Retorna mensagem de erro se o body não possui name', async () => {
       response = await chai.request(server)
         .post('/users')
-        .send({ email: 'adelinojunior@gmail.com', password: '123456' });
+        .send({ email: 'hhackenhaar@gmail.com', password: '444648' });
 
       expect(response).to.have.status(400);
       expect(response.body).to.have.property('message');
       expect(response.body.message).to.be.equal('Invalid entries. Try again.');
     })
   }); 
+  
 });
 
