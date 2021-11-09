@@ -85,7 +85,16 @@ describe('Valida a criação de um usuário em post /users', () => {
       expect(response).to.have.status(400);
       expect(response.body).to.have.property('message');
       expect(response.body.message).to.be.equal('Invalid entries. Try again.');
-    })
+    });
+    it('Retorna mensagem de erro se o body não possui email', async () => {
+      response = await chai.request(server)
+        .post('/users')
+        .send({ name: 'Heloísa J Hackenhaar', password: '444648' });
+
+      expect(response).to.have.status(400);
+      expect(response.body).to.have.property('message');
+      expect(response.body.message).to.be.equal('Invalid entries. Try again.');
+    });
   }); 
   
 });
