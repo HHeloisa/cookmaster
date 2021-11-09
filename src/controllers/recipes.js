@@ -16,47 +16,28 @@ const getAll = rescue(async (req, res) => {
 
 const getRecipeById = rescue(async (req, res) => {
   const { id } = req.params;
-  const { error, findedRecipe } = await recipesService.getRecipeById(id);
-  if (error) {
-    return res.status(error.status).json({ message: error.message });
-  }
+  const findedRecipe = await recipesService.getRecipeById(id);
   return res.status(status.sucess).json(findedRecipe);
 });
 
 const editRecipe = rescue(async (req, res) => {
-    console.log('entrei no controller');
     const { id } = req.params;
     const { name, ingredients, preparation } = req.body;
-
-    const { error, allInfoRecipe } = await recipesService
+    const allInfoRecipe = await recipesService
       .editRecipe(id, name, ingredients, preparation);
-    
-    if (error) {
-      const { message } = error;
-      return res.status(error.status).json({ message });
-    }
-    console.log('allInfoRecipeController', allInfoRecipe);
     return res.status(status.sucess).json(allInfoRecipe);
 });
 
 const deleteRecipe = rescue(async (req, res) => {
     const { id } = req.params;
-    const { error } = await recipesService.deleteRecipe(id);
-    if (error) {
-      const { message } = error;
-      return res.status(error.status).json({ message });
-    }
+    await recipesService.deleteRecipe(id);
     return res.status(status.noContent).json({});
   });
 
 const addImage = rescue(async (req, res) => {
   const { id } = req.params;
   const { path } = req.file;
-  const { error, recipeWithImg } = await recipesService.addImage(id, path);
-  if (error) {
-    const { message } = error;
-    return res.status(error.status).json({ message });
-  }
+  const recipeWithImg = await recipesService.addImage(id, path);
   return res.status(200).json(recipeWithImg);
 });
 
