@@ -65,13 +65,29 @@ describe.only('Valida a criação de um usuário em post /login', () => {
     it('Retorna mensagem de erro e status 401 se o body não possui password', async () => {
       response = await chai.request(server)
       .post('/login')
-      .send({ email: 'hhackenhaar@gmail.com', password: '444648' });
+      .send({ email: 'hhackenhaar@gmail.com' });
 
       expect(response.body).to.have.property('message');
       expect(response.body.message).to.be.equal(loginMessages.invalidData);
       expect(response).to.have.status(401);
     });
-     /* it('Retorna mensagem de erro se o usuario não existe', async () => {});
-    it('Retorna mensagem de erro se o a senha não corresponde a do banco de dados', async () => {}); */
+    it('Retorna mensagem de erro se o email não corresponde a nenhum do banco de dados', async () => {
+      response = await chai.request(server)
+      .post('/login')
+      .send({ email: 'heloisa@gmail.com', password: '444648' });
+      
+      expect(response.body).to.have.property('message');
+      expect(response.body.message).to.be.equal(loginMessages.incorretLogin);
+      expect(response).to.have.status(401);
+    });
+    it('Retorna mensagem de erro se a senha não corresponde ao cadastro', async () => {
+      response = await chai.request(server)
+      .post('/login')
+      .send({ email: 'hhackenhaar@gmail.com', password: '444444' });
+      
+      expect(response.body).to.have.property('message');
+      expect(response.body.message).to.be.equal(loginMessages.incorretLogin);
+      expect(response).to.have.status(401);
+    });
   })
 });
