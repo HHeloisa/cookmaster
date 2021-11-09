@@ -17,7 +17,7 @@ const userMock = {
   password: '444648'
 }
 
-describe.only('Valida a criação de um usuário em post /login', () => {
+describe('Valida a criação de um usuário em post /login', () => {
   
   describe('Login realizado com sucesso', () => {
     let response;
