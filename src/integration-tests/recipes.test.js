@@ -60,7 +60,6 @@ describe('Testes da rota GET /recipes', () => {
 describe('Testes da rota POST /recipes', () => {
   describe('Testa caso de sucesso em publicar uma receita', () => {
     let response;
-
     before(async () => {
       const connectionMock = await getMockConnection();
       sinon.stub(MongoClient, 'connect')
@@ -181,6 +180,64 @@ describe('Testes da rota POST /recipes', () => {
     expect(response.body).to.have.property('message');
     expect(response.body.message).to.be.equal(usersMessages.invalidEntries);
     });
-  }); 
+  });
+
 });
 
+describe('Testes da rota PUT /recipes', () => {
+  describe.only('Teste de sucesso de PUT /recipes', () => {
+    let response;
+    before(async () => {
+      const connectionMock = await getMockConnection();
+      sinon.stub(MongoClient, 'connect')
+      .resolves(connectionMock);
+
+      const usersCollection = connectionMock.db('Cookmaster').collection('users');
+      await usersCollection.insertOne(userMock);
+  
+      const token = await chai.request(server)
+      .post('/login')
+      .send({
+        email: 'hhackenhaar@gmail.com',
+        password: '444648'
+      })
+      .then((res) => res.body.token);
+    
+      const recipeId = await chai.request(server)
+      .post('/recipes')
+      .set('Authorization', token)
+      .send({
+        name: 'Lasanha vegana',
+        ingredients: 'Panequeca, Brocolis, Alho, FakeCheddar',
+        preparation: '2 horas'
+      })
+      .then((res) => res.body.recipe._id);
+
+      response = await chai.request(server)
+      .put(`/recipes/${recipeId}`)
+      .set('Authorization', token)
+      .send({
+        name: 'Lasanha vegana deliciosa',
+        ingredients: 'Panequeca, Brocolis, Alho, FakeCheddar, queijo de mandioca',
+        preparation: '3 horas'
+      });
+    });
+    it('retorna status de sucesso, e um objeto', async () => {
+      expect(response).to.have.status(status.sucess);
+      expect(response.body).to.be.an('object')
+    });
+    it('o objeto retornado contem o conteúdo alterado da receita', async () => {
+      expect(response.body.name).to.be.equal('Lasanha vegana deliciosa');
+      expect(response.body.ingredients).to.be.equal('Panequeca, Brocolis, Alho, FakeCheddar, queijo de mandioca');
+      expect(response.body.preparation).to.be.equal('3 horas')
+      expect(response.body).to.be.property('userId');
+      expect(response.body).to.be.property('_id');
+    });
+  });
+  /* describre('Testas caso de erros em PUT /recipes', () => {
+    it('sem :id não encontra a rota', async () => {});
+    it('sem "name", não realiza alteração, retorna status e message', async () => {});
+    it('sem "ingredients", não realiza alteração, retorna status e message', async () => {});
+    it('sem "preparation", não realiza alteração, retorna status e message', async () => {});
+  });  */
+});
