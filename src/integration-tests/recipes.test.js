@@ -47,7 +47,9 @@ describe('Testes da rota GET /recipes', () => {
         .get('/recipes')
         .set('Authorization', token);
       });
-
+      after(async () => {
+        MongoClient.connect.restore();
+      });
     it('retorna código de status "200"', () => {
       expect(response).to.have.status(200);
     });
@@ -84,6 +86,9 @@ describe('Testes da rota POST /recipes', () => {
           ingredients: 'Panequeca, Brocolis, Alho, FakeCheddar',
           preparation: '2 horas'
         });
+    after(async () => {
+      MongoClient.connect.restore();
+    });
     });
     it('adiciona uma receita, retorna status 201, e objeto "recipe"', async() => {
       expect(response).to.have.status(201);
@@ -107,7 +112,7 @@ describe('Testes da rota POST /recipes', () => {
       expect(response.body.recipe).to.be.property('_id');
     });
   });
-  describe('testa casos de erros de POST /recipes, com token', async () => {
+  describe('Testa casos de erros de POST /recipes, com token', async () => {
     let response;
     
     before(async () => {
@@ -118,7 +123,10 @@ describe('Testes da rota POST /recipes', () => {
       const usersCollection = connectionMock.db('Cookmaster').collection('users');
       await usersCollection.insertOne(userMock);      
     });
-    
+    after(async () => {
+      MongoClient.connect.restore();
+    });
+
     it('verifica body: sem name, retorna message e status', async () => {
       const token = await chai.request(server)
         .post('/login')
@@ -222,6 +230,9 @@ describe('Testes da rota PUT /recipes', () => {
         preparation: '3 horas'
       });
     });
+    after(async () => {
+      MongoClient.connect.restore();
+    });
     it('retorna status de sucesso, e um objeto', async () => {
       expect(response).to.have.status(status.sucess);
       expect(response.body).to.be.an('object')
@@ -242,6 +253,9 @@ describe('Testes da rota PUT /recipes', () => {
 
       const usersCollection = connectionMock.db('Cookmaster').collection('users');
       await usersCollection.insertOne(userMock);
+    });
+    after(async () => {
+      MongoClient.connect.restore();
     });
     it('sem :id não encontra a rota', async () => {
       const token = await chai.request(server)
@@ -386,8 +400,10 @@ describe('Teste da rota DELETE / recipes', () => {
       .delete(`/recipes/${recipeId}`)
       .set('Authorization', token);
     });
+    after(async () => {
+      MongoClient.connect.restore();
+    });
     it('Retorna status 204', () => {
-      console.log(response);
       expect(response).to.have.status(status.noContent);
     });
   });
@@ -399,6 +415,9 @@ describe('Teste da rota DELETE / recipes', () => {
 
       const usersCollection = connectionMock.db('Cookmaster').collection('users');
       await usersCollection.insertOne(userMock);
+    });
+    after(async () => {
+      MongoClient.connect.restore();
     });
     it('sem :id não encontra a rota', async () => {
       const token = await chai.request(server)

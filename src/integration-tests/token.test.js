@@ -29,6 +29,9 @@ describe('Sem token de autenticação, não é possível acessar rotas', () => {
       const usersCollection = connectionMock.db('Cookmaster').collection('users');
       await usersCollection.insertOne(userMock);
     });
+    after(async () => {
+      MongoClient.connect.restore();
+    });
     it('Não é possível acessar a rota POST /recipes sem token', async () => {
       response = await chai.request(server)
       .post('/recipes')
@@ -42,8 +45,7 @@ describe('Sem token de autenticação, não é possível acessar rotas', () => {
     });
   })
   describe('Testas rotas que precisam de /:id', () => {
-    let response;
-    
+      
     before(async () => {
       const connectionMock = await getMockConnection();
       sinon.stub(MongoClient, 'connect')
@@ -52,6 +54,10 @@ describe('Sem token de autenticação, não é possível acessar rotas', () => {
       const usersCollection = connectionMock.db('Cookmaster').collection('users');
       await usersCollection.insertOne(userMock);
     });
+    after(async () => {
+      MongoClient.connect.restore();
+    });
+
     it('Não é possível acessar a rota PUT /recipes sem token', async () => {
       const token = await chai.request(server)
       .post('/login')
