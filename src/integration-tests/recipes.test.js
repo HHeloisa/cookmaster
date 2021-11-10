@@ -185,7 +185,7 @@ describe('Testes da rota POST /recipes', () => {
 });
 
 describe('Testes da rota PUT /recipes', () => {
-  describe.only('Teste de sucesso de PUT /recipes', () => {
+  describe('Teste de sucesso de PUT /recipes', () => {
     let response;
     before(async () => {
       const connectionMock = await getMockConnection();
@@ -234,10 +234,120 @@ describe('Testes da rota PUT /recipes', () => {
       expect(response.body).to.be.property('_id');
     });
   });
-  /* describre('Testas caso de erros em PUT /recipes', () => {
-    it('sem :id não encontra a rota', async () => {});
-    it('sem "name", não realiza alteração, retorna status e message', async () => {});
-    it('sem "ingredients", não realiza alteração, retorna status e message', async () => {});
-    it('sem "preparation", não realiza alteração, retorna status e message', async () => {});
-  });  */
+  describe('Testas caso de erros em PUT /recipes', () => {
+    before(async () => {
+      const connectionMock = await getMockConnection();
+      sinon.stub(MongoClient, 'connect')
+      .resolves(connectionMock);
+
+      const usersCollection = connectionMock.db('Cookmaster').collection('users');
+      await usersCollection.insertOne(userMock);
+    });
+    it('sem :id não encontra a rota', async () => {
+      const token = await chai.request(server)
+      .post('/login')
+      .send({
+        email: 'hhackenhaar@gmail.com',
+        password: '444648'
+      })
+      .then((res) => res.body.token);
+
+      const response = await chai.request(server)
+      .put(`/recipes`)
+      .set('Authorization', token)
+      .send({
+        name: 'Lasanha vegana deliciosa',
+        ingredients: 'Panequeca, Brocolis, Alho, FakeCheddar, queijo de mandioca',
+        preparation: '3 horas'
+      });
+
+      expect(response).to.have.status(status.notFound);
+    }); 
+    it('sem "name", não realiza alteração, retorna status e message', async () => {
+      const token = await chai.request(server)
+      .post('/login')
+      .send({
+        email: 'hhackenhaar@gmail.com',
+        password: '444648'
+      })
+      .then((res) => res.body.token);
+    
+      const recipeId = await chai.request(server)
+      .post('/recipes')
+      .set('Authorization', token)
+      .send({
+        name: 'Lasanha vegana',
+        ingredients: 'Panequeca, Brocolis, Alho, FakeCheddar',
+        preparation: '2 horas'
+      })
+      .then((res) => res.body.recipe._id);
+
+      response = await chai.request(server)
+      .put(`/recipes/${recipeId}`)
+      .set('Authorization', token)
+      .send({
+        ingredients: 'Panequeca, Brocolis, Alho, FakeCheddar, queijo de mandioca',
+        preparation: '3 horas'
+      });
+    expect(response).to.have.status(status.badRequest);
+    expect(response.body).to.have.property('message');
+    expect(response.body.message).to.be.equal(usersMessages.invalidEntries);
+    });
+    it('sem "ingredients", não realiza alteração, retorna status e message', async () => {
+      const token = await chai.request(server)
+      .post('/login')
+      .send({
+        email: 'hhackenhaar@gmail.com',
+        password: '444648'
+      })
+      .then((res) => res.body.token);
+    
+      const recipeId = await chai.request(server)
+      .post('/recipes')
+      .set('Authorization', token)
+      .send({
+        name: 'Lasanha vegana',
+        ingredients: 'Panequeca, Brocolis, Alho, FakeCheddar',
+        preparation: '2 horas'
+      })
+      .then((res) => res.body.recipe._id);
+
+      response = await chai.request(server)
+      .put(`/recipes/${recipeId}`)
+      .set('Authorization', token)
+      .send({ name: 'Lasanha vegana', preparation: '3 horas' });
+
+    expect(response).to.have.status(status.badRequest);
+    expect(response.body).to.have.property('message');
+    expect(response.body.message).to.be.equal(usersMessages.invalidEntries);
+    });
+    it('sem "preparation", não realiza alteração, retorna status e message', async () => {
+      const token = await chai.request(server)
+      .post('/login')
+      .send({
+        email: 'hhackenhaar@gmail.com',
+        password: '444648'
+      })
+      .then((res) => res.body.token);
+    
+      const recipeId = await chai.request(server)
+      .post('/recipes')
+      .set('Authorization', token)
+      .send({
+        name: 'Lasanha vegana',
+        ingredients: 'Panequeca, Brocolis, Alho, FakeCheddar',
+        preparation: '2 horas'
+      })
+      .then((res) => res.body.recipe._id);
+
+      response = await chai.request(server)
+      .put(`/recipes/${recipeId}`)
+      .set('Authorization', token)
+      .send({ name: 'Lasanha vegana', ingredients: 'Panequeca, Brocolis, Alho, FakeCheddar' });
+      
+    expect(response).to.have.status(status.badRequest);
+    expect(response.body).to.have.property('message');
+    expect(response.body.message).to.be.equal(usersMessages.invalidEntries);
+    });
+  });
 });
