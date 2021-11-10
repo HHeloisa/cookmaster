@@ -3,7 +3,7 @@ const multer = require('multer');
 const recepiesController = require('../controllers/recipes');
 const { verifyToken } = require('../middlewares/authorizations');
 const { validateBodyRecepies } = require('../middlewares/validateRecepies'); 
-  /* validateAdminOrOwnerRecipe */ 
+const verifyAdminOrOwner = require('../middlewares/validateAdminOrOwner');
 
 router.get('/', recepiesController.getAll);
 
@@ -17,12 +17,12 @@ router.post('/',
 router.put('/:id',
   verifyToken,
   validateBodyRecepies,
-  /* validateAdminOrOwnerRecipe */
+  verifyAdminOrOwner,
   recepiesController.editRecipe);
 
 router.delete('/:id', 
   verifyToken,
-  /* validateAdminOrOwnerRecipe, */
+  verifyAdminOrOwner,
   recepiesController.deleteRecipe);
 
   /* ========================================================= */
@@ -40,6 +40,7 @@ router.delete('/:id',
 
   router.put('/:id/image/', 
   verifyToken,
+  verifyAdminOrOwner,
   uploadImage.single('image'),
   recepiesController.addImage); 
 

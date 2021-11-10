@@ -16,7 +16,6 @@ function generateToken(_id, email, role) {
 }
 
 const verifyToken = async (req, res, next) => {
-  console.log('estou verificando o token, por favor espera');
   try {
     const token = req.headers.authorization;
     if (!token) return res.status(status.unauth).json({ message: authMessages.missingToken });
