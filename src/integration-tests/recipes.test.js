@@ -355,9 +355,43 @@ describe('Testes da rota PUT /recipes', () => {
 
 describe('Teste da rota DELETE / recipes', () => {
   describe('Teste de sucesso de DELETE /recipes', () => {
-    it('Não contém body, possui status 204', () => {});
+    let response;
+    before(async () => {
+      const connectionMock = await getMockConnection();
+      sinon.stub(MongoClient, 'connect')
+      .resolves(connectionMock);
+
+      const usersCollection = connectionMock.db('Cookmaster').collection('users');
+      await usersCollection.insertOne(userMock);
+  
+      const token = await chai.request(server)
+      .post('/login')
+      .send({
+        email: 'hhackenhaar@gmail.com',
+        password: '444648'
+      })
+      .then((res) => res.body.token);
+    
+      const recipeId = await chai.request(server)
+      .post('/recipes')
+      .set('Authorization', token)
+      .send({
+        name: 'Lasanha vegana',
+        ingredients: 'Panequeca, Brocolis, Alho, FakeCheddar',
+        preparation: '2 horas'
+      })
+      .then((res) => res.body.recipe._id);
+
+      response = await chai.request(server)
+      .delete(`/recipes/${recipeId}`)
+      .set('Authorization', token);
+    });
+    it('Retorna status 204', () => {
+      console.log(response);
+      expect(response).to.have.status(status.noContent);
+    });
   });
-  describe.only('Testas caso de erros em DELETE /recipes', () => {
+  describe('Testas caso de erros em DELETE /recipes', () => {
     before(async () => {
       const connectionMock = await getMockConnection();
       sinon.stub(MongoClient, 'connect')
@@ -383,7 +417,6 @@ describe('Teste da rota DELETE / recipes', () => {
         ingredients: 'Panequeca, Brocolis, Alho, FakeCheddar, queijo de mandioca',
         preparation: '3 horas'
       });
-
       expect(response).to.have.status(status.notFound);
     });
   });
