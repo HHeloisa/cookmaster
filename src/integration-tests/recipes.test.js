@@ -108,7 +108,7 @@ describe('Testes da rota POST /recipes', () => {
       expect(response.body.recipe).to.be.property('_id');
     });
   });
-  describe.only('testa casos de erros de POST /recipes, com token', async () => {
+  describe('testa casos de erros de POST /recipes, com token', async () => {
     let response;
     
     before(async () => {
