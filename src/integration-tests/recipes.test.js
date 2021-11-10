@@ -351,3 +351,40 @@ describe('Testes da rota PUT /recipes', () => {
     });
   });
 });
+
+
+describe('Teste da rota DELETE / recipes', () => {
+  describe('Teste de sucesso de DELETE /recipes', () => {
+    it('Não contém body, possui status 204', () => {});
+  });
+  describe.only('Testas caso de erros em DELETE /recipes', () => {
+    before(async () => {
+      const connectionMock = await getMockConnection();
+      sinon.stub(MongoClient, 'connect')
+      .resolves(connectionMock);
+
+      const usersCollection = connectionMock.db('Cookmaster').collection('users');
+      await usersCollection.insertOne(userMock);
+    });
+    it('sem :id não encontra a rota', async () => {
+      const token = await chai.request(server)
+      .post('/login')
+      .send({
+        email: 'hhackenhaar@gmail.com',
+        password: '444648'
+      })
+      .then((res) => res.body.token);
+
+      const response = await chai.request(server)
+      .delete(`/recipes`)
+      .set('Authorization', token)
+      .send({
+        name: 'Lasanha vegana deliciosa',
+        ingredients: 'Panequeca, Brocolis, Alho, FakeCheddar, queijo de mandioca',
+        preparation: '3 horas'
+      });
+
+      expect(response).to.have.status(status.notFound);
+    });
+  });
+});
