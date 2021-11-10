@@ -16,3 +16,6 @@ const verifyAdminOrOwner = async (req, res, next) => {
 };
 
 module.exports = verifyAdminOrOwner;
+
+// Implementação realizada com sucesso graças ao apoio do Caio Oliveira,
+// que apontou que _id é um objeto, portanto, é necessario utilziar o JSON.stringify.
