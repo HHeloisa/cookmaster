@@ -21,18 +21,18 @@ const getRecipeById = rescue(async (req, res) => {
 });
 
 const editRecipe = rescue(async (req, res) => {
-    const { id } = req.params;
-    const { name, ingredients, preparation } = req.body;
-    const allInfoRecipe = await recipesService
-      .editRecipe(id, name, ingredients, preparation);
-    return res.status(status.sucess).json(allInfoRecipe);
+  const { id } = req.params;
+  const { name, ingredients, preparation } = req.body;
+  const allInfoRecipe = await recipesService
+    .editRecipe(id, name, ingredients, preparation);
+  return res.status(status.sucess).json(allInfoRecipe);
 });
 
 const deleteRecipe = rescue(async (req, res) => {
-    const { id } = req.params;
-    await recipesService.deleteRecipe(id);
-    return res.status(status.noContent).json({});
-  });
+  const { id } = req.params;
+  await recipesService.deleteRecipe(id);
+  return res.status(status.noContent).json({});
+});
 
 const addImage = rescue(async (req, res) => {
   const { id } = req.params;

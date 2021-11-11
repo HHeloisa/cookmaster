@@ -13,11 +13,11 @@ const getAll = async () => {
 };
 
 const getRecipeById = async (id) => {
- const findedRecipe = await recipeModel.getRecipeById(id);
- if (!findedRecipe) {
+  const findedRecipe = await recipeModel.getRecipeById(id);
+  if (!findedRecipe) {
    throw createError(status.notFound, recipesMessages.notFound);
- }
- return findedRecipe;
+  }
+  return findedRecipe;
 };
 
 const editRecipe = async (id, name, ingredients, preparation) => {

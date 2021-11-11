@@ -31,4 +31,9 @@ const recipesMessages = {
   notFound: 'recipe not found',
 };
 
-module.exports = { status, usersMessages, loginMessages, authMessages, recipesMessages };
+const otherMessage = {
+  unknown: 'Erro desconhecido, sinto muito.',
+};
+
+module.exports = { 
+  status, usersMessages, loginMessages, authMessages, recipesMessages, otherMessage };
