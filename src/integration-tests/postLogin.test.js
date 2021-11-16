@@ -4,90 +4,147 @@ const sinon = require('sinon');
 
 const { getMockConnection } = require("./connectionMock");
 const server = require('../api/app');
-const { loginMessages } = require('../messages');
+const { newUser, loginWithoutEmail, loginWithoutPassW, incorretLogin, correctLogin } = require('./helpersObjects');
+const { status, loginMessages } = require('../messages');
 
 const chaiHttp = require('chai-http');
 chai.use(chaiHttp);
 
 const { expect } = chai;
 
-const userMock = {
-  name: 'Heloísa J. Hackenahar',
-  email: 'hhackenhaar@gmail.com',
-  password: '444648'
-}
+describe.only('Valida a rota post /login', () => {
+  let connectionMock;
 
-describe('Valida a criação de um usuário em post /login', () => {
-  
-  describe('Login realizado com sucesso', () => {
-    let response;
-
-    before(async () => {
-      const connectionMock = await getMockConnection();
-      sinon.stub(MongoClient, 'connect')
-      .resolves(connectionMock);
-
-      // cria um usuario, para depois efetuar login
-      await connectionMock.db('Cookmaster').collection('users').insertOne(userMock);
-    });
-
-    after(async () => {
-      MongoClient.connect.restore();
-    });
-
-    it('Espera que o retorno em body seja um objeto com a propriedade "token"', async () => {
-      response = await chai.request(server)
-      .post('/login')
-      .send({ email: 'hhackenhaar@gmail.com', password: '444648' });
-
-      expect(response.body).to.have.property('token');
-      expect(response.body['token']).to.be.a('string');
-      ;
-    });
-    it('Espera que o status do login realizado seja 200', async () => {
-      response = await chai.request(server)
-      .post('/login')
-      .send({ email: 'hhackenhaar@gmail.com', password: '444648' });
-
-      expect(response).to.have.status(200);
-    });
+  before(async () => {
+    connectionMock = await getMockConnection();
+    sinon.stub(MongoClient, 'connect').resolves(connectionMock);
   });
-  describe('Erro ao efetuar login', () => {
-    it('Retorna mensagem de erro e status 401 se o body não possui email', async () => {
-      response = await chai.request(server)
-      .post('/login')
-      .send({ password: '444648' });
 
-      expect(response.body).to.have.property('message');
-      expect(response.body.message).to.be.equal(loginMessages.invalidData);
-      expect(response).to.have.status(401);
-    });
-    it('Retorna mensagem de erro e status 401 se o body não possui password', async () => {
-      response = await chai.request(server)
-      .post('/login')
-      .send({ email: 'hhackenhaar@gmail.com' });
+  after(() => {
+    MongoClient.connect.restore();
+  });
 
-      expect(response.body).to.have.property('message');
-      expect(response.body.message).to.be.equal(loginMessages.invalidData);
-      expect(response).to.have.status(401);
+    describe('Valida se o email e password são obrigatórios', () => {
+      let response;
+
+      before(async () => {
+        response = await chai.request(server).post('/login').send({});
+      })
+
+      it('verifica se retorna status "401", e mensagem correspondente', (done) => {
+        expect(response).to.have.status(401);
+        done();
+      });
+      it('verifica se "message" corresponde a "All fields must be filled"', (done) => {
+        expect(response.body.message).to.be.equals(loginMessages.invalidData);
+        done();
+      });
     });
-    it('Retorna mensagem de erro se o email não corresponde a nenhum do banco de dados', async () => {
-      response = await chai.request(server)
-      .post('/login')
-      .send({ email: 'heloisa@gmail.com', password: '444648' });
-      
-      expect(response.body).to.have.property('message');
-      expect(response.body.message).to.be.equal(loginMessages.incorretLogin);
-      expect(response).to.have.status(401);
+    describe('Valida o campo email', () => {
+      let response;
+  
+      before(async () => {
+        const usersCollection = connectionMock.db('Cookmaster').collection('users');
+        await usersCollection.insertOne(newUser);
+  
+        response = await chai.request(server).post('/login').send(loginWithoutEmail);
+      });
+  
+      after(async () => {
+        const usersCollection = connectionMock.db('Cookmaster').collection('users');
+        await usersCollection.deleteOne({
+          email: 'hhackenhaar@gmail.com'
+        });
+      })
+
+      it('Retorna status 401 se o body não possui email', (done) => {
+        expect(response).to.have.status(status.unauth);
+        done();
+      });
+      it('Retorna propriedade message com mensagem ""Incorrect username or password"', (done) => {
+        expect(response.body).to.have.property('message');
+        expect(response.body.message).to.be.equal(loginMessages.invalidData);
+        done();
+      });
     });
-    it('Retorna mensagem de erro se a senha não corresponde ao cadastro', async () => {
-      response = await chai.request(server)
-      .post('/login')
-      .send({ email: 'hhackenhaar@gmail.com', password: '444444' });
-      
-      expect(response.body).to.have.property('message');
-      expect(response.body.message).to.be.equal(loginMessages.incorretLogin);
-      expect(response).to.have.status(401);
+    describe('Valida o campo password', () => {
+      let response;
+  
+      before(async () => {
+        const usersCollection = connectionMock.db('Cookmaster').collection('users');
+        await usersCollection.insertOne(newUser);
+  
+        response = await chai.request(server).post('/login').send(loginWithoutPassW);
+      });
+  
+      after(async () => {
+        const usersCollection = connectionMock.db('Cookmaster').collection('users');
+        await usersCollection.deleteOne({
+          email: 'hhackenhaar@gmail.com'
+        });
+      })
+
+      it('Retorna status 401 se o body não possui password', (done) => {
+        expect(response).to.have.status(status.unauth);
+        done();
+      });
+      it('Retorna propriedade message com mensagem ""Incorrect username or password"', (done) => {
+        expect(response.body).to.have.property('message');
+        expect(response.body.message).to.be.equal(loginMessages.invalidData);
+        done();
+      });
     });
-  })
+    describe('Verifica se o login corresponde ao banco de dados', () => {
+      let response;
+  
+      before(async () => {
+        const usersCollection = connectionMock.db('Cookmaster').collection('users');
+        await usersCollection.insertOne(newUser);
+  
+        response = await chai.request(server).post('/login').send(incorretLogin);
+      });
+  
+      after(async () => {
+        const usersCollection = connectionMock.db('Cookmaster').collection('users');
+        await usersCollection.deleteOne({
+          email: 'hhackenhaar@gmail.com'
+        });
+      })
+      it('Retorna status 401, se login não corresponde', (done) => {
+        expect(response).to.have.status(status.unauth);
+        done();
+      });
+      it('Retorna propriedade message com mensagem "Incorrect username or password"', (done) => {
+        expect(response.body).to.have.property('message');
+        expect(response.body.message).to.be.equal(loginMessages.incorretLogin);
+        done();
+      });
+    });
+    describe('Login realizado com sucesso', () => {
+      let response;
+
+      before(async () => {
+        const usersCollection = connectionMock.db('Cookmaster').collection('users');
+        await usersCollection.insertOne(newUser);
+  
+        response = await chai.request(server).post('/login').send(correctLogin);
+      });
+  
+      after(async () => {
+        const usersCollection = connectionMock.db('Cookmaster').collection('users');
+        await usersCollection.deleteOne({
+          email: 'hhackenhaar@gmail.com'
+        });
+      })
+
+      it('Espera que o status do login realizado seja 200', (done) => {
+        expect(response).to.have.status(status.sucess);
+        done();
+      });
+      it('Espera que o retorno em body seja um objeto com a propriedade "token"',  (done) => {
+        expect(response.body).to.have.property('token');
+        expect(response.body['token']).to.be.a('string');
+        done();
+      });
+    });  
 });
