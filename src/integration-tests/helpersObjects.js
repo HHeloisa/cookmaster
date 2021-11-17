@@ -34,5 +34,11 @@ const correctLogin = {
   password: '444648'
 }
 
+const recipe = {
+  name: 'Lasanha vegana',
+  ingredients: 'Panequeca, Brocolis, Alho, FakeCheddar',
+  preparation: '2 horas'
+}
+
 module.exports = { newUser, loginWithoutEmail, loginWithoutPassW, incorretLogin, correctLogin,
-userWithoutEmail, userWithoutName, userWithoutPassW };
+userWithoutEmail, userWithoutName, userWithoutPassW, recipe };
