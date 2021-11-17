@@ -4,6 +4,7 @@ const sinon = require('sinon');
 
 const { getMockConnection } = require("./connectionMock");
 const server = require('../api/app');
+const { newUser, correctLogin, recipe } = require('./helpersObjects');
 const { status, authMessages } = require('../messages');
 
 const chaiHttp = require('chai-http');
@@ -11,108 +12,111 @@ chai.use(chaiHttp);
 
 const { expect } = chai;
 
-const userMock = {
-  name: 'Heloísa J. Hackenahar',
-  email: 'hhackenhaar@gmail.com',
-  password: '444648'
-}
+
 
 describe('Sem token de autenticação, não é possível acessar rotas', () => {
-  describe('Testa rota que não requer :id', () => {
+  let connectionMock;
+
+  before(async () => {
+    connectionMock = await getMockConnection();
+    sinon.stub(MongoClient, 'connect').resolves(connectionMock);
+  });
+  after(() => {
+    MongoClient.connect.restore();
+  });
+
+  describe('Não é possível acessar a rota POST /recipes sem token', () => {
     let response;
     
-    before(async () => {
-      const connectionMock = await getMockConnection();
-      sinon.stub(MongoClient, 'connect')
-      .resolves(connectionMock);
-      
+    before(async () => {      
       const usersCollection = connectionMock.db('Cookmaster').collection('users');
-      await usersCollection.insertOne(userMock);
+      await usersCollection.insertOne(newUser);
+
+      response = await chai.request(server).post('/recipes').send(recipe);
     });
     after(async () => {
-      MongoClient.connect.restore();
-    });
-    it('Não é possível acessar a rota POST /recipes sem token', async () => {
-      response = await chai.request(server)
-      .post('/recipes')
-      .send({
-        ingredients: 'Panequeca, Brocolis, Alho, FakeCheddar',
-        preparation: '2 horas'
+      const usersCollection = connectionMock.db('Cookmaster').collection('users');
+      await usersCollection.deleteOne({
+        email: 'hhackenhaar@gmail.com'
       });
+    });
+   
+    it('Sem token, retorna status 401', (done) => {
       expect(response).to.have.status(status.unauth);
+      done();
+    });
+    it('Sem token, retorna propriedade message com valor "missing auth token"', (done) => {
       expect(response.body).to.have.property('message');
       expect(response.body.message).to.be.equal(authMessages.missingToken);
-    });
+      done();
+    })
   })
-  describe('Testas rotas que precisam de /:id', () => {
-      
-    before(async () => {
-      const connectionMock = await getMockConnection();
-      sinon.stub(MongoClient, 'connect')
-      .resolves(connectionMock);
-      
-      const usersCollection = connectionMock.db('Cookmaster').collection('users');
-      await usersCollection.insertOne(userMock);
-    });
-    after(async () => {
-      MongoClient.connect.restore();
-    });
 
-    it('Não é possível acessar a rota PUT /recipes sem token', async () => {
-      const token = await chai.request(server)
-      .post('/login')
-      .send({
-        email: 'hhackenhaar@gmail.com',
-        password: '444648'
-      })
-      .then((res) => res.body.token);
-    
-      const recipeId = await chai.request(server)
+  describe('Não é possível acessar a rota PUT /recipes sem token', () => {
+    let response;
+    before(async () => {  
+      const usersCollection = connectionMock.db('Cookmaster').collection('users');
+      await usersCollection.insertOne(newUser);
+      const { body: { token } } = await chai.request(server).post('/login').send(correctLogin);
+      const { body: { recipe: _id } } = await chai.request(server)
       .post('/recipes')
       .set('Authorization', token)
-      .send({
-        name: 'Lasanha vegana',
-        ingredients: 'Panequeca, Brocolis, Alho, FakeCheddar',
-        preparation: '2 horas'
-      })
-      .then((res) => res.body.recipe._id);
+      .send(recipe)
 
       response = await chai.request(server)
-      .put(`/recipes/${recipeId}`)
+      .put(`/recipes/${ _id }`)
       .send({
         name: 'Lasanha vegana deliciosa',
         ingredients: 'Panequeca, Brocolis, Alho, FakeCheddar, queijo de mandioca',
         preparation: '3 horas'
       });
+    });
+    after(async () => {
+      const usersCollection = connectionMock.db('Cookmaster').collection('users');
+      await usersCollection.deleteOne({
+        email: 'hhackenhaar@gmail.com'
+      });
+    });
+    it('Sem token, retorna status 401', (done) => {
       expect(response).to.have.status(status.unauth);
+      done()
+    });
+    it('Sem token, retorna propriedade message com valor "missing auth token"', (done) => {
       expect(response.body).to.have.property('message');
       expect(response.body.message).to.be.equal(authMessages.missingToken);
+      done();
     });
-    it('Não é possível acessar a rota DELETE /recipes sem token', async () => {
-      const token = await chai.request(server)
-      .post('/login')
-      .send({
-        email: 'hhackenhaar@gmail.com',
-        password: '444648'
-      })
-      .then((res) => res.body.token);
-    
-      const recipeId = await chai.request(server)
+  });
+  
+  
+  describe('Não é possível acessar a rota DELETE /recipes sem token', () => {
+    let response;
+    before(async () => {  
+      const usersCollection = connectionMock.db('Cookmaster').collection('users');
+      await usersCollection.insertOne(newUser);
+      const { body: { token } } = await chai.request(server).post('/login').send(correctLogin);
+      const { body: { recipe: _id } } = await chai.request(server)
       .post('/recipes')
       .set('Authorization', token)
-      .send({
-        name: 'Lasanha vegana',
-        ingredients: 'Panequeca, Brocolis, Alho, FakeCheddar',
-        preparation: '2 horas'
-      })
-      .then((res) => res.body.recipe._id);
+      .send(recipe)
 
       response = await chai.request(server)
-      .delete(`/recipes/${recipeId}`)
-
-      expect(response).to.have.status(status.unauth);
-      expect(response.body).to.have.property('message');
-      expect(response.body.message).to.be.equal(authMessages.missingToken);
+      .delete(`/recipes/${ _id }`);
     });
-  })
+    after(async () => {
+      const usersCollection = connectionMock.db('Cookmaster').collection('users');
+      await usersCollection.deleteOne({
+        email: 'hhackenhaar@gmail.com'
+      });
+    });
+    it('Sem token, retorna status 401', (done) => {
+    expect(response).to.have.status(status.unauth);
+    done();
+    });
+    it('Sem token, retorna propriedade message com valor "missing auth token"', (done) => {
+    expect(response.body).to.have.property('message');
+    expect(response.body.message).to.be.equal(authMessages.missingToken);
+    done();
+    });
+  });
 });

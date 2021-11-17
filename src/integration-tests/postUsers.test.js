@@ -14,7 +14,7 @@ chai.use(chaiHttp);
 const { expect } = chai;
 
 
-describe.only('Valida a rota post /users', () => {
+describe('Valida a rota post /users', () => {
   let connectionMock;
 
   before(async () => {
