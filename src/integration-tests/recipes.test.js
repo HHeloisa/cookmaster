@@ -197,23 +197,26 @@ describe('Testes da rota POST /recipes', () => {
   });
 });
 
-describe('Testes da rota PUT /recipes', () => {
+describe.only('Testes da rota PUT /recipes', () => {
   let connectionMock;
 
   before(async () => {
     connectionMock = await getMockConnection();
       sinon.stub(MongoClient, 'connect')
       .resolves(connectionMock);
+    const usersCollection = connectionMock.db('Cookmaster').collection('users');
+    await usersCollection.insertOne(newUser);
   });
+
   after(async () => {
+    const usersCollection = connectionMock.db('Cookmaster').collection('users');
+    await usersCollection.deleteOne({ email: newUser.email });
     MongoClient.connect.restore();
   });
 
-  describe.only('Teste de sucesso de editar uma receita', () => {
+  describe('Teste de sucesso de editar uma receita', () => {
     let response;
     before(async () => {
-      const usersCollection = connectionMock.db('Cookmaster').collection('users');
-      await usersCollection.insertOne(newUser);
       const { body: { token } } = await chai.request(server).post('/login').send(correctLogin);
       const { body: { recipe: _id } } = await chai.request(server)
       .post('/recipes')
@@ -231,10 +234,7 @@ describe('Testes da rota PUT /recipes', () => {
         });
     });
     
-    after(async () => {
-      const usersCollection = connectionMock.db('Cookmaster').collection('users');
-      await usersCollection.deleteOne({ email: newUser.email });
-    });
+   
     
     it('retorna status de 200, e um objeto', (done) => {
       expect(response).to.have.status(status.sucess);
@@ -250,131 +250,99 @@ describe('Testes da rota PUT /recipes', () => {
       done();
     });
   });
-});
-  describe('Testas caso de erros em PUT /recipes', () => {
-    before(async () => {
-      const connectionMock = await getMockConnection();
-      sinon.stub(MongoClient, 'connect')
-      .resolves(connectionMock);
-
-      const usersCollection = connectionMock.db('Cookmaster').collection('users');
-      await usersCollection.insertOne(newUser);
-    });
-    after(async () => {
-      MongoClient.connect.restore();
-    });
-    it('sem :id não encontra a rota', async (done) => {
-      const token = await chai.request(server)
-      .post('/login')
-      .send({
-        email: 'hhackenhaar@gmail.com',
-        password: '444648'
-      })
-      .then((res) => res.body.token);
-
-      const response = await chai.request(server)
-      .put(`/recipes`)
-      .set('Authorization', token)
-      .send({
-        name: 'Lasanha vegana deliciosa',
-        ingredients: 'Panequeca, Brocolis, Alho, FakeCheddar, queijo de mandioca',
-        preparation: '3 horas'
+  describe('Testas caso de erros em PUT /recipes', () => {    
+    describe('sem :id não encontra a rota', () => {
+      let response;
+      before(async () => {
+        const { body: { token } } = await chai.request(server).post('/login').send(correctLogin);
+        response = await chai.request(server)
+        .put(`/recipes`)
+        .set('Authorization', token)
+        .send({
+          name: 'Lasanha vegana deliciosa',
+          ingredients: 'Panequeca, Brocolis, Alho, FakeCheddar, queijo de mandioca',
+          preparation: '3 horas'
+        });
       });
-
-      expect(response).to.have.status(status.notFound);
-      done();
-    }); 
-    it('sem "name", não realiza alteração, retorna status e message', async (done) => {
-      const token = await chai.request(server)
-      .post('/login')
-      .send({
-        email: 'hhackenhaar@gmail.com',
-        password: '444648'
-      })
-      .then((res) => res.body.token);
-    
-      const recipeId = await chai.request(server)
-      .post('/recipes')
-      .set('Authorization', token)
-      .send({
-        name: 'Lasanha vegana',
-        ingredients: 'Panequeca, Brocolis, Alho, FakeCheddar',
-        preparation: '2 horas'
-      })
-      .then((res) => res.body.recipe._id);
-
-      response = await chai.request(server)
-      .put(`/recipes/${recipeId}`)
-      .set('Authorization', token)
-      .send({
-        ingredients: 'Panequeca, Brocolis, Alho, FakeCheddar, queijo de mandioca',
-        preparation: '3 horas'
+      it('Retorna status 404', (done) => {
+        expect(response).to.have.status(status.notFound);
+        done();
+      }); 
+    });
+    describe('Verificação do body: sem name, não altera receita', () => {
+      let response;
+      before(async () => {
+        const { body: { token } } = await chai.request(server).post('/login').send(correctLogin);
+        const { body: { recipe: _id } } = await chai.request(server)
+        .post('/recipes')
+        .set('Authorization', token)
+        .send(recipe);
+        const { _id: recipeId  } = _id
+        response = await chai.request(server)
+        .put(`/recipes/${ recipeId }`)
+        .set('Authorization', token)
+        .send(recipeWithoutName);
       });
-    expect(response).to.have.status(status.badRequest);
-    expect(response.body).to.have.property('message');
-    expect(response.body.message).to.be.equal(usersMessages.invalidEntries);
-    done();
+      it('Retorna status 400', (done) => {
+        expect(response).to.have.status(status.badRequest);
+        done();
+      });
+      it('Retorna propriedade message com valor "Invalid entries. Try again.', (done) => {
+        expect(response.body).to.have.property('message');
+        expect(response.body.message).to.be.equal(usersMessages.invalidEntries);
+        done();
+      });
     });
-    it('sem "ingredients", não realiza alteração, retorna status e message', async (done) => {
-      const token = await chai.request(server)
-      .post('/login')
-      .send({
-        email: 'hhackenhaar@gmail.com',
-        password: '444648'
-      })
-      .then((res) => res.body.token);
-    
-      const recipeId = await chai.request(server)
-      .post('/recipes')
-      .set('Authorization', token)
-      .send({
-        name: 'Lasanha vegana',
-        ingredients: 'Panequeca, Brocolis, Alho, FakeCheddar',
-        preparation: '2 horas'
-      })
-      .then((res) => res.body.recipe._id);
-
-      response = await chai.request(server)
-      .put(`/recipes/${recipeId}`)
-      .set('Authorization', token)
-      .send({ name: 'Lasanha vegana', preparation: '3 horas' });
-
-    expect(response).to.have.status(status.badRequest);
-    expect(response.body).to.have.property('message');
-    expect(response.body.message).to.be.equal(usersMessages.invalidEntries);
-    done();
+    describe('Verificação do body: sem ingredients, não altera receita', () => {
+      let response;
+      before(async () => {
+        const { body: { token } } = await chai.request(server).post('/login').send(correctLogin);
+        const { body: { recipe: _id } } = await chai.request(server)
+        .post('/recipes')
+        .set('Authorization', token)
+        .send(recipe);
+        const { _id: recipeId  } = _id
+        response = await chai.request(server)
+        .put(`/recipes/${ recipeId }`)
+        .set('Authorization', token)
+        .send(recipeWithoutIngredients);
+      });
+      it('Retorna status 400', (done) => {
+        expect(response).to.have.status(status.badRequest);
+        done();
+      });
+      it('Retorna propriedade message com valor "Invalid entries. Try again.', (done) => {
+        expect(response.body).to.have.property('message');
+        expect(response.body.message).to.be.equal(usersMessages.invalidEntries);
+        done();
+      });
     });
-    it('sem "preparation", não realiza alteração, retorna status e message', async (done) => {
-      const token = await chai.request(server)
-      .post('/login')
-      .send({
-        email: 'hhackenhaar@gmail.com',
-        password: '444648'
-      })
-      .then((res) => res.body.token);
-    
-      const recipeId = await chai.request(server)
-      .post('/recipes')
-      .set('Authorization', token)
-      .send({
-        name: 'Lasanha vegana',
-        ingredients: 'Panequeca, Brocolis, Alho, FakeCheddar',
-        preparation: '2 horas'
-      })
-      .then((res) => res.body.recipe._id);
-
-      response = await chai.request(server)
-      .put(`/recipes/${recipeId}`)
-      .set('Authorization', token)
-      .send({ name: 'Lasanha vegana', ingredients: 'Panequeca, Brocolis, Alho, FakeCheddar' });
-      
-    expect(response).to.have.status(status.badRequest);
-    expect(response.body).to.have.property('message');
-    expect(response.body.message).to.be.equal(usersMessages.invalidEntries);
-    done();
+    describe('Verificação do body: sem preparation, não altera receita', () => {
+      let response;
+      before(async () => {
+        const { body: { token } } = await chai.request(server).post('/login').send(correctLogin);
+        const { body: { recipe: _id } } = await chai.request(server)
+        .post('/recipes')
+        .set('Authorization', token)
+        .send(recipe);
+        const { _id: recipeId  } = _id
+        response = await chai.request(server)
+        .put(`/recipes/${ recipeId }`)
+        .set('Authorization', token)
+        .send(recipeWithoutIngredients);
+      });
+      it('retorna status 400', (done) => {
+        expect(response).to.have.status(status.badRequest);
+        done();
+      });
+      it('Retorna propriedade message com valor "Invalid entries. Try again.', (done) => {
+        expect(response.body).to.have.property('message');
+        expect(response.body.message).to.be.equal(usersMessages.invalidEntries);
+        done();
+      });
     });
   });
-
+});
 
 /* describe('Teste da rota DELETE / recipes', () => {
   describe('Teste de sucesso de DELETE /recipes', () => {
