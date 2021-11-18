@@ -9,7 +9,9 @@ const sinon = require('sinon');
 const { getMockConnection } = require("./connectionMock");
 const server = require('../api/app');
 const { status, recipesMessages, usersMessages } = require('../messages');
-const { newUser, correctLogin, recipe/* userWithoutEmail,  userWithoutName, userWithoutPassW */ } = require('./helpersObjects');
+const { newUser, correctLogin, reciperecipeWithoutName, recipeWithoutIngredients,
+  recipeWithoutPreparation, 
+  recipeWithoutName} = require('./helpersObjects');
 
 
 const chaiHttp = require('chai-http');
@@ -66,7 +68,7 @@ describe('Testes da rota GET /recipes', () => {
   });
 })
 
-describe('Testes da rota POST /recipes', () => {
+describe.only('Testes da rota POST /recipes', () => {
   let connectionMock;
   before(async () => {
     connectionMock = await getMockConnection();
@@ -77,7 +79,7 @@ describe('Testes da rota POST /recipes', () => {
     MongoClient.connect.restore();
   });
 
-  describe.only('Testa caso de sucesso em publicar uma receita', () => {
+  describe('Testa caso de sucesso em publicar uma receita', () => {
     let response;
     before(async () => {
       const usersCollection = connectionMock.db('Cookmaster').collection('users');
@@ -121,90 +123,80 @@ describe('Testes da rota POST /recipes', () => {
       done();
     });
   });
-  describe('Testa casos de erros de POST /recipes, com token', async () => {
+  describe.only('Testa casos de falha em publicar uma receita', () => {
+    before(async () => {
+    const usersCollection = connectionMock.db('Cookmaster').collection('users');
+        await usersCollection.insertOne(newUser);
+    });
+    after(async () => {
+      const usersCollection = connectionMock.db('Cookmaster').collection('users');
+      await usersCollection.deleteOne({
+        email: 'hhackenhaar@gmail.com'
+      });
+    })
+
+  describe('Erros em POST /recipes, sem name no body', async () => {
     let response;
     
     before(async () => {
-      const connectionMock = await getMockConnection();
-      sinon.stub(MongoClient, 'connect')
-      .resolves(connectionMock);
-  
-      const usersCollection = connectionMock.db('Cookmaster').collection('users');
-      await usersCollection.insertOne(newUser);      
-    });
-    after(async () => {
-      MongoClient.connect.restore();
-    });
-
-    it('verifica body: sem name, retorna message e status', async (done) => {
-      const token = await chai.request(server)
-        .post('/login')
-        .send({
-          email: 'hhackenhaar@gmail.com',
-          password: '444648'
-        })
-        .then((res) => res.body.token);
-
+      const { body: { token } } = await chai.request(server).post('/login').send(correctLogin);
       response = await chai.request(server)
-      .post('/recipes')
-      .set('Authorization', token)
-      .send({
-        ingredients: 'Panequeca, Brocolis, Alho, FakeCheddar',
-        preparation: '2 horas'
-      });
-
+        .post('/recipes')
+        .set('Authorization', token)
+        .send(recipeWithoutName);
+    });  
+    it('verifica body: sem name, retorna status 400', async (done) => {
       expect(response).to.have.status(status.badRequest);
+      done();
+    });
+    it('verifica body: sem name, retorna message "Invalid entries. Try again."', async (done) => {
       expect(response.body).to.have.property('message');
       expect(response.body.message).to.be.equal(usersMessages.invalidEntries);
       done();
     });
-    it('verifica body: sem ingredients, retorna message e status', async (done) => {
-      const token = await chai.request(server)
-      .post('/login')
-      .send({
-        email: 'hhackenhaar@gmail.com',
-        password: '444648'
-      })
-
-      .then((res) => res.body.token);
-      response = await chai.request(server)
-      .post('/recipes')
-      .set('Authorization', token)
-      .send({
-        name: 'Lasanha vegana',
-        preparation: '2 horas'
-      });
-    expect(response).to.have.status(status.badRequest);
-    expect(response.body).to.have.property('message');
-    expect(response.body.message).to.be.equal(usersMessages.invalidEntries);
-    done();
-    });
-    it('verifica body: preparation, retorna message e status', async (done) => {
-      const token = await chai.request(server)
-      .post('/login')
-      .send({
-        email: 'hhackenhaar@gmail.com',
-        password: '444648'
-      })
-      .then((res) => res.body.token);
+  });
+  describe('Erros em POST /recipes, sem ingredients no body', async () => {
+    let response;
     
+    before(async () => {
+      const { body: { token } } = await chai.request(server).post('/login').send(correctLogin);
       response = await chai.request(server)
-      .post('/recipes')
-      .set('Authorization', token)
-      .send({
-        name: 'Lasanha vegana',
-        ingredients: 'Panequeca, Brocolis, Alho, FakeCheddar',
-      });
-    expect(response).to.have.status(status.badRequest);
-    expect(response.body).to.have.property('message');
-    expect(response.body.message).to.be.equal(usersMessages.invalidEntries);
-    done();
+        .post('/recipes')
+        .set('Authorization', token)
+        .send(recipeWithoutIngredients);
+    });
+    it('verifica body: sem ingredients, retorna status 400', (done) => {
+      expect(response).to.have.status(status.badRequest);
+      done();
+    });
+    it('verifica body: sem ingredients, retorna message "Invalid entries. Try again."', (done) => {
+      expect(response.body).to.have.property('message');
+      expect(response.body.message).to.be.equal(usersMessages.invalidEntries);
+      done();
     });
   });
-
+  describe('Erros em POST /recipes, sem preparation no body', async () => {
+    let response;
+    before(async () => {
+      const { body: { token } } = await chai.request(server).post('/login').send(correctLogin);
+      response = await chai.request(server)
+        .post('/recipes')
+        .set('Authorization', token)
+        .send(recipeWithoutPreparation);
+    });
+    it('verifica body: preparation, retorna message e status', (done) => {
+      expect(response).to.have.status(status.badRequest);
+      done();
+    });
+    it('verifica body: sem preparation, retorna message "Invalid entries. Try again."', (done) => {
+      expect(response.body).to.have.property('message');
+      expect(response.body.message).to.be.equal(usersMessages.invalidEntries);
+      done();
+    });
+  });
+  });
 });
-
-describe('Testes da rota PUT /recipes', () => {
+/* describe('Testes da rota PUT /recipes', () => {
   describe('Teste de sucesso de PUT /recipes', () => {
     let response;
     before(async () => {
@@ -459,4 +451,4 @@ describe('Teste da rota DELETE / recipes', () => {
       done();
     });
   });
-});
+}); */
