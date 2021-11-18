@@ -40,5 +40,19 @@ const recipe = {
   preparation: '2 horas'
 }
 
+const recipeWithoutName = {
+  ingredients: 'Panequeca, Brocolis, Alho, FakeCheddar',
+  preparation: '2 horas'
+}
+const recipeWithoutIngredients = {
+  name: 'Lasanha vegana',
+  preparation: '2 horas'
+}
+const recipeWithoutPreparation = {
+  name: 'Lasanha vegana',
+  ingredients: 'Panequeca, Brocolis, Alho, FakeCheddar',
+}
+
 module.exports = { newUser, loginWithoutEmail, loginWithoutPassW, incorretLogin, correctLogin,
-userWithoutEmail, userWithoutName, userWithoutPassW, recipe };
+userWithoutEmail, userWithoutName, userWithoutPassW, recipe, recipeWithoutName, recipeWithoutIngredients,
+recipeWithoutPreparation };
