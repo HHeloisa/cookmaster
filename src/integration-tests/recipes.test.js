@@ -1,3 +1,7 @@
+/* É preciso refatorar estes testess porque nao os its nao devem fazer requisições
+nem ter done e resopnse juntos
+ver nos outros testes ja refatorados. */
+
 const { MongoClient } = require('mongodb');
 const chai = require('chai');
 const sinon = require('sinon');
@@ -5,35 +9,31 @@ const sinon = require('sinon');
 const { getMockConnection } = require("./connectionMock");
 const server = require('../api/app');
 const { status, recipesMessages, usersMessages } = require('../messages');
+const { newUser, recipe /* userWithoutEmail, userWithoutName, userWithoutPassW */ } = require('./helpersObjects');
+
 
 const chaiHttp = require('chai-http');
 chai.use(chaiHttp);
 
 const { expect } = chai;
 
-const userMock = {
-  name: 'Heloísa J. Hackenahar',
-  email: 'hhackenhaar@gmail.com',
-  password: '444648'
-}
+describe.only('Testes da rota GET /recipes', () => { 
+  let connectionMock;
 
-const recipeMock = {
-  name: 'Lasanha vegana',
-  ingredients: 'Panequeca, Brocolis, Alho, FakeCheddar',
-  preparation: '2 horas'
-}
+  before(async () => {
+    connectionMock = await getMockConnection();
+    sinon.stub(MongoClient, 'connect').resolves(connectionMock);    
+  });
 
-describe('Testes da rota GET /recipes', () => { 
+  after(async () => {
+    MongoClient.connect.restore();
+  });
   describe('testa caso de sucesso em buscar todas as receitas', () => {
     let response;
 
     before(async () => {
-      const connectionMock = await getMockConnection();
-      sinon.stub(MongoClient, 'connect')
-      .resolves(connectionMock);
-
       const usersCollection = connectionMock.db('Cookmaster').collection('users');
-      await usersCollection.insertOne(userMock);
+      await usersCollection.insertOne(newUser);
   
       const token = await chai.request(server)
         .post('/login')
@@ -46,15 +46,22 @@ describe('Testes da rota GET /recipes', () => {
       response = await chai.request(server)
         .get('/recipes')
         .set('Authorization', token);
-      });
-      after(async () => {
-        MongoClient.connect.restore();
-      });
-    it('retorna código de status "200"', () => {
-      expect(response).to.have.status(200);
     });
-    it('retorna um array no body', () => {
+
+    after(async () => {
+      const usersCollection = connectionMock.db('Cookmaster').collection('users');
+      await usersCollection.deleteOne({
+        email: 'hhackenhaar@gmail.com'
+      });
+    })
+      
+    it('retorna código de status "200"', (done) => {
+      expect(response).to.have.status(200);
+      done();
+    });
+    it('retorna um array no body', (done) => {
       expect(response.body).to.be.an('array');
+      done();
     });
   });
 })
@@ -68,7 +75,7 @@ describe('Testes da rota POST /recipes', () => {
       .resolves(connectionMock);
 
       const usersCollection = connectionMock.db('Cookmaster').collection('users');
-      await usersCollection.insertOne(userMock);
+      await usersCollection.insertOne(newUser);
   
       const token = await chai.request(server)
         .post('/login')
@@ -90,26 +97,31 @@ describe('Testes da rota POST /recipes', () => {
       MongoClient.connect.restore();
     });
     });
-    it('adiciona uma receita, retorna status 201, e objeto "recipe"', async() => {
+    it('adiciona uma receita, retorna status 201, e objeto "recipe"', async(done) => {
       expect(response).to.have.status(201);
       expect(response.body).to.be.an('object')
       expect(response.body).to.be.property('recipe');
+      done();
     })
-    it('verifica se objeto "recipe" contém: name com conteudo correspondete', async() => {
+    it('verifica se objeto "recipe" contém: name com conteudo correspondete', async(done) => {
       expect(response.body.recipe).to.be.property('name');
       expect(response.body.recipe.name).to.be.equal('Lasanha vegana');
+      done();
     });
-    it('verifica se objeto "recipe" contém: ingredients com conteudo correspondete', async() => {
+    it('verifica se objeto "recipe" contém: ingredients com conteudo correspondete', async(done) => {
       expect(response.body.recipe).to.be.property('ingredients')
       expect(response.body.recipe.ingredients).to.be.equal('Panequeca, Brocolis, Alho, FakeCheddar');
+      done();
     });
-    it('verifica se objeto "recipe" contém: preparation com conteudo correspondete', async() => {
+    it('verifica se objeto "recipe" contém: preparation com conteudo correspondete', async(done) => {
       expect(response.body.recipe).to.be.property('preparation')
       expect(response.body.recipe.preparation).to.be.equal('2 horas');
+      done();
     });
-    it('verifica se objeto "recipe" contém: userId, e _ud com conteudo correspondete', async() => {
+    it('verifica se objeto "recipe" contém: userId, e _ud com conteudo correspondete', async(done) => {
       expect(response.body.recipe).to.be.property('userId');
       expect(response.body.recipe).to.be.property('_id');
+      done();
     });
   });
   describe('Testa casos de erros de POST /recipes, com token', async () => {
@@ -121,13 +133,13 @@ describe('Testes da rota POST /recipes', () => {
       .resolves(connectionMock);
   
       const usersCollection = connectionMock.db('Cookmaster').collection('users');
-      await usersCollection.insertOne(userMock);      
+      await usersCollection.insertOne(newUser);      
     });
     after(async () => {
       MongoClient.connect.restore();
     });
 
-    it('verifica body: sem name, retorna message e status', async () => {
+    it('verifica body: sem name, retorna message e status', async (done) => {
       const token = await chai.request(server)
         .post('/login')
         .send({
@@ -147,8 +159,9 @@ describe('Testes da rota POST /recipes', () => {
       expect(response).to.have.status(status.badRequest);
       expect(response.body).to.have.property('message');
       expect(response.body.message).to.be.equal(usersMessages.invalidEntries);
+      done();
     });
-    it('verifica body: sem ingredients, retorna message e status', async () => {
+    it('verifica body: sem ingredients, retorna message e status', async (done) => {
       const token = await chai.request(server)
       .post('/login')
       .send({
@@ -167,8 +180,9 @@ describe('Testes da rota POST /recipes', () => {
     expect(response).to.have.status(status.badRequest);
     expect(response.body).to.have.property('message');
     expect(response.body.message).to.be.equal(usersMessages.invalidEntries);
+    done();
     });
-    it('verifica body: preparation, retorna message e status', async () => {
+    it('verifica body: preparation, retorna message e status', async (done) => {
       const token = await chai.request(server)
       .post('/login')
       .send({
@@ -187,6 +201,7 @@ describe('Testes da rota POST /recipes', () => {
     expect(response).to.have.status(status.badRequest);
     expect(response.body).to.have.property('message');
     expect(response.body.message).to.be.equal(usersMessages.invalidEntries);
+    done();
     });
   });
 
@@ -201,7 +216,7 @@ describe('Testes da rota PUT /recipes', () => {
       .resolves(connectionMock);
 
       const usersCollection = connectionMock.db('Cookmaster').collection('users');
-      await usersCollection.insertOne(userMock);
+      await usersCollection.insertOne(newUser);
   
       const token = await chai.request(server)
       .post('/login')
@@ -233,16 +248,18 @@ describe('Testes da rota PUT /recipes', () => {
     after(async () => {
       MongoClient.connect.restore();
     });
-    it('retorna status de sucesso, e um objeto', async () => {
+    it('retorna status de sucesso, e um objeto', async (done) => {
       expect(response).to.have.status(status.sucess);
       expect(response.body).to.be.an('object')
+      done();
     });
-    it('o objeto retornado contem o conteúdo alterado da receita', async () => {
+    it('o objeto retornado contem o conteúdo alterado da receita', async (done) => {
       expect(response.body.name).to.be.equal('Lasanha vegana deliciosa');
       expect(response.body.ingredients).to.be.equal('Panequeca, Brocolis, Alho, FakeCheddar, queijo de mandioca');
       expect(response.body.preparation).to.be.equal('3 horas')
       expect(response.body).to.be.property('userId');
       expect(response.body).to.be.property('_id');
+      done();
     });
   });
   describe('Testas caso de erros em PUT /recipes', () => {
@@ -252,12 +269,12 @@ describe('Testes da rota PUT /recipes', () => {
       .resolves(connectionMock);
 
       const usersCollection = connectionMock.db('Cookmaster').collection('users');
-      await usersCollection.insertOne(userMock);
+      await usersCollection.insertOne(newUser);
     });
     after(async () => {
       MongoClient.connect.restore();
     });
-    it('sem :id não encontra a rota', async () => {
+    it('sem :id não encontra a rota', async (done) => {
       const token = await chai.request(server)
       .post('/login')
       .send({
@@ -276,8 +293,9 @@ describe('Testes da rota PUT /recipes', () => {
       });
 
       expect(response).to.have.status(status.notFound);
+      done();
     }); 
-    it('sem "name", não realiza alteração, retorna status e message', async () => {
+    it('sem "name", não realiza alteração, retorna status e message', async (done) => {
       const token = await chai.request(server)
       .post('/login')
       .send({
@@ -306,8 +324,9 @@ describe('Testes da rota PUT /recipes', () => {
     expect(response).to.have.status(status.badRequest);
     expect(response.body).to.have.property('message');
     expect(response.body.message).to.be.equal(usersMessages.invalidEntries);
+    done();
     });
-    it('sem "ingredients", não realiza alteração, retorna status e message', async () => {
+    it('sem "ingredients", não realiza alteração, retorna status e message', async (done) => {
       const token = await chai.request(server)
       .post('/login')
       .send({
@@ -334,8 +353,9 @@ describe('Testes da rota PUT /recipes', () => {
     expect(response).to.have.status(status.badRequest);
     expect(response.body).to.have.property('message');
     expect(response.body.message).to.be.equal(usersMessages.invalidEntries);
+    done();
     });
-    it('sem "preparation", não realiza alteração, retorna status e message', async () => {
+    it('sem "preparation", não realiza alteração, retorna status e message', async (done) => {
       const token = await chai.request(server)
       .post('/login')
       .send({
@@ -362,6 +382,7 @@ describe('Testes da rota PUT /recipes', () => {
     expect(response).to.have.status(status.badRequest);
     expect(response.body).to.have.property('message');
     expect(response.body.message).to.be.equal(usersMessages.invalidEntries);
+    done();
     });
   });
 });
@@ -376,7 +397,7 @@ describe('Teste da rota DELETE / recipes', () => {
       .resolves(connectionMock);
 
       const usersCollection = connectionMock.db('Cookmaster').collection('users');
-      await usersCollection.insertOne(userMock);
+      await usersCollection.insertOne(newUser);
   
       const token = await chai.request(server)
       .post('/login')
@@ -403,8 +424,9 @@ describe('Teste da rota DELETE / recipes', () => {
     after(async () => {
       MongoClient.connect.restore();
     });
-    it('Retorna status 204', () => {
+    it('Retorna status 204', (done) => {
       expect(response).to.have.status(status.noContent);
+      done();
     });
   });
   describe('Testas caso de erros em DELETE /recipes', () => {
@@ -414,12 +436,12 @@ describe('Teste da rota DELETE / recipes', () => {
       .resolves(connectionMock);
 
       const usersCollection = connectionMock.db('Cookmaster').collection('users');
-      await usersCollection.insertOne(userMock);
+      await usersCollection.insertOne(newUser);
     });
     after(async () => {
       MongoClient.connect.restore();
     });
-    it('sem :id não encontra a rota', async () => {
+    it('sem :id não encontra a rota', async (done) => {
       const token = await chai.request(server)
       .post('/login')
       .send({
@@ -437,6 +459,7 @@ describe('Teste da rota DELETE / recipes', () => {
         preparation: '3 horas'
       });
       expect(response).to.have.status(status.notFound);
+      done();
     });
   });
 });
