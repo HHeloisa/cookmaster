@@ -197,7 +197,7 @@ describe('Testes da rota POST /recipes', () => {
   });
 });
 
-describe.only('Testes da rota PUT /recipes', () => {
+describe('Testes da rota PUT /recipes', () => {
   let connectionMock;
 
   before(async () => {
@@ -344,78 +344,57 @@ describe.only('Testes da rota PUT /recipes', () => {
   });
 });
 
-/* describe('Teste da rota DELETE / recipes', () => {
+describe('Teste da rota DELETE / recipes', () => {
+  let connectionMock;
+  before(async () => {
+    connectionMock = await getMockConnection();
+    sinon.stub(MongoClient, 'connect')
+    .resolves(connectionMock);
+
+    const usersCollection = connectionMock.db('Cookmaster').collection('users');
+    await usersCollection.insertOne(newUser);
+  });
+  after(async () => {
+    const usersCollection = connectionMock.db('Cookmaster').collection('users');
+    await usersCollection.deleteOne({ email: newUser.email });
+    MongoClient.connect.restore();
+  });
+
   describe('Teste de sucesso de DELETE /recipes', () => {
     let response;
     before(async () => {
-      const connectionMock = await getMockConnection();
-      sinon.stub(MongoClient, 'connect')
-      .resolves(connectionMock);
-
-      const usersCollection = connectionMock.db('Cookmaster').collection('users');
-      await usersCollection.insertOne(newUser);
-  
-      const token = await chai.request(server)
-      .post('/login')
-      .send({
-        email: 'hhackenhaar@gmail.com',
-        password: '444648'
-      })
-      .then((res) => res.body.token);
-    
-      const recipeId = await chai.request(server)
+      const { body: { token } } = await chai.request(server).post('/login').send(correctLogin);
+      const { body: { recipe: _id } } = await chai.request(server)
       .post('/recipes')
       .set('Authorization', token)
-      .send({
-        name: 'Lasanha vegana',
-        ingredients: 'Panequeca, Brocolis, Alho, FakeCheddar',
-        preparation: '2 horas'
-      })
-      .then((res) => res.body.recipe._id);
+      .send(recipe)
 
+      const { _id: recipeId  } = _id
       response = await chai.request(server)
-      .delete(`/recipes/${recipeId}`)
-      .set('Authorization', token);
-    });
-    after(async () => {
-      MongoClient.connect.restore();
+        .delete(`/recipes/${ recipeId }`)
+        .set('Authorization', token)
     });
     it('Retorna status 204', (done) => {
       expect(response).to.have.status(status.noContent);
       done();
     });
   });
-  describe('Testas caso de erros em DELETE /recipes', () => {
+  describe('Testas caso de erros em DELETE /recipes, sem id', () => {
+    let response;
     before(async () => {
-      const connectionMock = await getMockConnection();
-      sinon.stub(MongoClient, 'connect')
-      .resolves(connectionMock);
-
-      const usersCollection = connectionMock.db('Cookmaster').collection('users');
-      await usersCollection.insertOne(newUser);
-    });
-    after(async () => {
-      MongoClient.connect.restore();
-    });
-    it('sem :id não encontra a rota', async (done) => {
-      const token = await chai.request(server)
-      .post('/login')
-      .send({
-        email: 'hhackenhaar@gmail.com',
-        password: '444648'
-      })
-      .then((res) => res.body.token);
-
-      const response = await chai.request(server)
-      .delete(`/recipes`)
+      const { body: { token } } = await chai.request(server).post('/login').send(correctLogin);
+      const { body: { recipe: _id } } = await chai.request(server)
+      .post('/recipes')
       .set('Authorization', token)
-      .send({
-        name: 'Lasanha vegana deliciosa',
-        ingredients: 'Panequeca, Brocolis, Alho, FakeCheddar, queijo de mandioca',
-        preparation: '3 horas'
-      });
+      .send(recipe)
+
+      response = await chai.request(server)
+        .delete(`/recipes/`)
+        .set('Authorization', token)
+    });
+    it('Retorna status 404', (done) => {
       expect(response).to.have.status(status.notFound);
       done();
     });
   });
-}); */
+});
