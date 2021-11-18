@@ -9,7 +9,7 @@ const sinon = require('sinon');
 const { getMockConnection } = require("./connectionMock");
 const server = require('../api/app');
 const { status, recipesMessages, usersMessages } = require('../messages');
-const { newUser, correctLogin, reciperecipeWithoutName, recipeWithoutIngredients,
+const { newUser, correctLogin, recipe, reciperecipeWithoutName, recipeWithoutIngredients,
   recipeWithoutPreparation, 
   recipeWithoutName} = require('./helpersObjects');
 
@@ -68,7 +68,7 @@ describe('Testes da rota GET /recipes', () => {
   });
 })
 
-describe.only('Testes da rota POST /recipes', () => {
+describe('Testes da rota POST /recipes', () => {
   let connectionMock;
   before(async () => {
     connectionMock = await getMockConnection();
@@ -93,8 +93,8 @@ describe.only('Testes da rota POST /recipes', () => {
     after(async () => {
       const usersCollection = connectionMock.db('Cookmaster').collection('users');
       await usersCollection.deleteOne({ email: newUser.email });
-      const recipesCollection = connectionMock.db('Cookmaster').collection('recipes');
-      await recipesCollection.deleteOne({name: recipe.name});
+     /*  const recipesCollection = connectionMock.db('Cookmaster').collection('recipes');
+      await recipesCollection.deleteOne({name: recipe.name}); */
     });
     it('adiciona uma receita, retorna status 201, e objeto "recipe"', async(done) => {
       expect(response).to.have.status(201);
@@ -123,7 +123,7 @@ describe.only('Testes da rota POST /recipes', () => {
       done();
     });
   });
-  describe.only('Testa casos de falha em publicar uma receita', () => {
+  describe('Testa casos de falha em publicar uma receita', () => {
     before(async () => {
     const usersCollection = connectionMock.db('Cookmaster').collection('users');
         await usersCollection.insertOne(newUser);
