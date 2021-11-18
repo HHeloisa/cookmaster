@@ -96,28 +96,28 @@ describe('Testes da rota POST /recipes', () => {
      /*  const recipesCollection = connectionMock.db('Cookmaster').collection('recipes');
       await recipesCollection.deleteOne({name: recipe.name}); */
     });
-    it('adiciona uma receita, retorna status 201, e objeto "recipe"', async(done) => {
+    it('adiciona uma receita, retorna status 201, e objeto "recipe"', (done) => {
       expect(response).to.have.status(201);
       expect(response.body).to.be.an('object')
       expect(response.body).to.be.property('recipe');
       done();
     })
-    it('verifica se objeto "recipe" contém: name com conteudo correspondete', async(done) => {
+    it('verifica se objeto "recipe" contém: name com conteudo correspondete', (done) => {
       expect(response.body.recipe).to.be.property('name');
       expect(response.body.recipe.name).to.be.equal('Lasanha vegana');
       done();
     });
-    it('verifica se objeto "recipe" contém: ingredients com conteudo correspondete', async(done) => {
+    it('verifica se objeto "recipe" contém: ingredients com conteudo correspondete', (done) => {
       expect(response.body.recipe).to.be.property('ingredients')
       expect(response.body.recipe.ingredients).to.be.equal('Panequeca, Brocolis, Alho, FakeCheddar');
       done();
     });
-    it('verifica se objeto "recipe" contém: preparation com conteudo correspondete', async(done) => {
+    it('verifica se objeto "recipe" contém: preparation com conteudo correspondete', (done) => {
       expect(response.body.recipe).to.be.property('preparation')
       expect(response.body.recipe.preparation).to.be.equal('2 horas');
       done();
     });
-    it('verifica se objeto "recipe" contém: userId, e _id', async(done) => {
+    it('verifica se objeto "recipe" contém: userId, e _id', (done) => {
       expect(response.body.recipe).to.be.property('userId');
       expect(response.body.recipe).to.be.property('_id');
       done();
@@ -196,53 +196,52 @@ describe('Testes da rota POST /recipes', () => {
   });
   });
 });
-/* describe('Testes da rota PUT /recipes', () => {
-  describe('Teste de sucesso de PUT /recipes', () => {
-    let response;
-    before(async () => {
-      const connectionMock = await getMockConnection();
+
+describe('Testes da rota PUT /recipes', () => {
+  let connectionMock;
+
+  before(async () => {
+    connectionMock = await getMockConnection();
       sinon.stub(MongoClient, 'connect')
       .resolves(connectionMock);
+  });
+  after(async () => {
+    MongoClient.connect.restore();
+  });
 
+  describe.only('Teste de sucesso de editar uma receita', () => {
+    let response;
+    before(async () => {
       const usersCollection = connectionMock.db('Cookmaster').collection('users');
       await usersCollection.insertOne(newUser);
-  
-      const token = await chai.request(server)
-      .post('/login')
-      .send({
-        email: 'hhackenhaar@gmail.com',
-        password: '444648'
-      })
-      .then((res) => res.body.token);
-    
-      const recipeId = await chai.request(server)
+      const { body: { token } } = await chai.request(server).post('/login').send(correctLogin);
+      const { body: { recipe: _id } } = await chai.request(server)
       .post('/recipes')
       .set('Authorization', token)
-      .send({
-        name: 'Lasanha vegana',
-        ingredients: 'Panequeca, Brocolis, Alho, FakeCheddar',
-        preparation: '2 horas'
-      })
-      .then((res) => res.body.recipe._id);
+      .send(recipe)
 
+      const { _id: recipeId  } = _id
       response = await chai.request(server)
-      .put(`/recipes/${recipeId}`)
-      .set('Authorization', token)
-      .send({
-        name: 'Lasanha vegana deliciosa',
-        ingredients: 'Panequeca, Brocolis, Alho, FakeCheddar, queijo de mandioca',
-        preparation: '3 horas'
-      });
+        .put(`/recipes/${ recipeId }`)
+        .set('Authorization', token)
+        .send({
+          name: 'Lasanha vegana deliciosa',
+          ingredients: 'Panequeca, Brocolis, Alho, FakeCheddar, queijo de mandioca',
+          preparation: '3 horas'
+        });
     });
+    
     after(async () => {
-      MongoClient.connect.restore();
+      const usersCollection = connectionMock.db('Cookmaster').collection('users');
+      await usersCollection.deleteOne({ email: newUser.email });
     });
-    it('retorna status de sucesso, e um objeto', async (done) => {
+    
+    it('retorna status de 200, e um objeto', (done) => {
       expect(response).to.have.status(status.sucess);
       expect(response.body).to.be.an('object')
       done();
     });
-    it('o objeto retornado contem o conteúdo alterado da receita', async (done) => {
+    it('o objeto retornado contem o conteúdo alterado da receita', (done) => {
       expect(response.body.name).to.be.equal('Lasanha vegana deliciosa');
       expect(response.body.ingredients).to.be.equal('Panequeca, Brocolis, Alho, FakeCheddar, queijo de mandioca');
       expect(response.body.preparation).to.be.equal('3 horas')
@@ -251,6 +250,7 @@ describe('Testes da rota POST /recipes', () => {
       done();
     });
   });
+});
   describe('Testas caso de erros em PUT /recipes', () => {
     before(async () => {
       const connectionMock = await getMockConnection();
@@ -374,10 +374,9 @@ describe('Testes da rota POST /recipes', () => {
     done();
     });
   });
-});
 
 
-describe('Teste da rota DELETE / recipes', () => {
+/* describe('Teste da rota DELETE / recipes', () => {
   describe('Teste de sucesso de DELETE /recipes', () => {
     let response;
     before(async () => {
