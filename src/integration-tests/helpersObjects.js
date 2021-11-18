@@ -2,7 +2,7 @@ const newUser = {
   name: 'Heloísa J. Hackenahar',
   email: 'hhackenhaar@gmail.com',
   password: '444648'
-}
+};
 
 const userWithoutName = {
   email: 'hhackenhaar@gmail.com',

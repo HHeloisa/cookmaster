@@ -30,15 +30,21 @@ describe('Valida a rota post /users', () => {
     let response;
 
     before(async () => {
-      response = await chai.request(server).post('/users').send(newUser);
+      response = await chai.request(server).post('/users').send({
+        name: 'Heloísa J. Hackenahar',
+        email: 'hhackenhaar@gmail.com',
+        password: '444648'
+      });
     })
     after(async () => {
       const usersCollection = connectionMock.db('Cookmaster').collection('users');
       await usersCollection.deleteOne({
         email: 'hhackenhaar@gmail.com'
       });
+      console.log('deleteriusuario');
     })
     it('Espera que o retorno em body seja um objeto com a propriedade "user"', (done) => {
+      console.log(response.body)
       expect(response.body).to.be.an('object')
       expect(response.body).to.be.property('user');
       done();
@@ -143,13 +149,13 @@ describe('Valida a rota post /users', () => {
       let response;
       before(async () => {
         const usersCollection = connectionMock.db('Cookmaster').collection('users');
-        await usersCollection.insertOne({
+        await usersCollection.insertOne(newUser);
+  
+        response = await chai.request(server).post('/users').send({
           name: 'Heloísa J. Hackenahar',
           email: 'hhackenhaar@gmail.com',
           password: '444648'
-        });
-  
-        response = await chai.request(server).post('/users').send(newUser)
+        })
       });
   
       after(async () => {
