@@ -9,7 +9,7 @@ const sinon = require('sinon');
 const { getMockConnection } = require("./connectionMock");
 const server = require('../api/app');
 const { status, recipesMessages, usersMessages } = require('../messages');
-const { newUser, recipe /* userWithoutEmail, userWithoutName, userWithoutPassW */ } = require('./helpersObjects');
+const { newUser, correctLogin, recipe/* userWithoutEmail,  userWithoutName, userWithoutPassW */ } = require('./helpersObjects');
 
 
 const chaiHttp = require('chai-http');
@@ -17,7 +17,7 @@ chai.use(chaiHttp);
 
 const { expect } = chai;
 
-describe.only('Testes da rota GET /recipes', () => { 
+describe('Testes da rota GET /recipes', () => { 
   let connectionMock;
 
   before(async () => {
@@ -67,35 +67,32 @@ describe.only('Testes da rota GET /recipes', () => {
 })
 
 describe('Testes da rota POST /recipes', () => {
-  describe('Testa caso de sucesso em publicar uma receita', () => {
+  let connectionMock;
+  before(async () => {
+    connectionMock = await getMockConnection();
+    sinon.stub(MongoClient, 'connect')
+    .resolves(connectionMock);
+  });
+  after(async () => {
+    MongoClient.connect.restore();
+  });
+
+  describe.only('Testa caso de sucesso em publicar uma receita', () => {
     let response;
     before(async () => {
-      const connectionMock = await getMockConnection();
-      sinon.stub(MongoClient, 'connect')
-      .resolves(connectionMock);
-
       const usersCollection = connectionMock.db('Cookmaster').collection('users');
       await usersCollection.insertOne(newUser);
-  
-      const token = await chai.request(server)
-        .post('/login')
-        .send({
-          email: 'hhackenhaar@gmail.com',
-          password: '444648'
-        })
-        .then((res) => res.body.token);
-  
+      const { body: { token } } = await chai.request(server).post('/login').send(correctLogin);
       response = await chai.request(server)
         .post('/recipes')
         .set('Authorization', token)
-        .send({
-          name: 'Lasanha vegana',
-          ingredients: 'Panequeca, Brocolis, Alho, FakeCheddar',
-          preparation: '2 horas'
-        });
-    after(async () => {
-      MongoClient.connect.restore();
+        .send(recipe);
     });
+    after(async () => {
+      const usersCollection = connectionMock.db('Cookmaster').collection('users');
+      await usersCollection.deleteOne({ email: newUser.email });
+      const recipesCollection = connectionMock.db('Cookmaster').collection('recipes');
+      await recipesCollection.deleteOne({name: recipe.name});
     });
     it('adiciona uma receita, retorna status 201, e objeto "recipe"', async(done) => {
       expect(response).to.have.status(201);
@@ -118,7 +115,7 @@ describe('Testes da rota POST /recipes', () => {
       expect(response.body.recipe.preparation).to.be.equal('2 horas');
       done();
     });
-    it('verifica se objeto "recipe" contém: userId, e _ud com conteudo correspondete', async(done) => {
+    it('verifica se objeto "recipe" contém: userId, e _id', async(done) => {
       expect(response.body.recipe).to.be.property('userId');
       expect(response.body.recipe).to.be.property('_id');
       done();
