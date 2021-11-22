@@ -242,9 +242,8 @@ describe('Testes da rota PUT /recipes', () => {
       done();
     });
   });
- /* ================================NÃO FINALIZADO=========================================== */
   describe('Testas caso de erros em PUT /recipes', () => {  
-  /*    describe.skip('Com id errado, não encontra receita', () => {
+     describe('Com id errado, não encontra receita', () => {
       let response;
       before(async () => {
         const wrongRecipeId = '14151615'
@@ -268,8 +267,7 @@ describe('Testes da rota PUT /recipes', () => {
         expect(response.body.message).to.be.equal(recipesMessages.notFound);
         done();
       });
-    }); */
-    /* ================================^NÃO FINALIZADO=========================================== */
+    });
     describe('sem :id não encontra a rota', () => {
       let response;
       before(async () => {
