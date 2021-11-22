@@ -4,9 +4,8 @@ const sinon = require('sinon');
 const { getMockConnection } = require("./connectionMock");
 const server = require('../api/app');
 const { status, recipesMessages, usersMessages } = require('../messages');
-const { newUser, correctLogin, recipe, reciperecipeWithoutName, recipeWithoutIngredients,
-  recipeWithoutPreparation, 
-  recipeWithoutName} = require('./helpersObjects');
+const { newUser, correctLogin, recipe, recipeWithoutIngredients,
+  recipeWithoutPreparation, recipeWithoutName,} = require('./helpersObjects');
 const chaiHttp = require('chai-http');
 chai.use(chaiHttp);
 
@@ -262,6 +261,7 @@ describe('Testes da rota PUT /recipes', () => {
         done();
       }); 
     });
+    
     describe('Verificação do body: sem name, não altera receita', () => {
       let response;
       before(async () => {

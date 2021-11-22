@@ -9,7 +9,7 @@ const chaiHttp = require('chai-http');
 chai.use(chaiHttp);
 const { expect } = chai;
 
-describe.only('Valida a rota post /users/admin', () => {
+describe('Valida a rota post /users/admin', () => {
   let connectionMock;
 
   before(async () => {

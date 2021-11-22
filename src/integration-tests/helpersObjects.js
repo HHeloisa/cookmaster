@@ -4,6 +4,17 @@ const newUser = {
   password: '444648'
 };
 
+const otherUser = {
+  name: 'Conceição',
+  email: 'conceicao@email.com',
+  password: '111213'
+};
+
+const otherUserLogin = {
+  email: 'conceicao@email.com',
+  password: '111213'
+};
+
 const userWithoutName = {
   email: 'hhackenhaar@gmail.com',
   password: '444648'
@@ -59,4 +70,4 @@ const newAdmin = { name: 'Nova administradora', email: 'novaAdm@email.com', pass
 
 module.exports = { newUser, loginWithoutEmail, loginWithoutPassW, incorretLogin, correctLogin,
 userWithoutEmail, userWithoutName, userWithoutPassW, recipe, recipeWithoutName, recipeWithoutIngredients,
-recipeWithoutPreparation, adminUser, newAdmin };
+recipeWithoutPreparation, adminUser, newAdmin, otherUser, otherUserLogin };
