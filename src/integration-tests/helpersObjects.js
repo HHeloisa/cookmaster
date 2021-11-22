@@ -53,6 +53,10 @@ const recipeWithoutPreparation = {
   ingredients: 'Panequeca, Brocolis, Alho, FakeCheddar',
 }
 
+const adminUser = { email: 'root@email.com', password: 'admin' };
+
+const newAdmin = { name: 'Nova administradora', email: 'novaAdm@email.com', password: 'newAdmin'}
+
 module.exports = { newUser, loginWithoutEmail, loginWithoutPassW, incorretLogin, correctLogin,
 userWithoutEmail, userWithoutName, userWithoutPassW, recipe, recipeWithoutName, recipeWithoutIngredients,
-recipeWithoutPreparation };
+recipeWithoutPreparation, adminUser, newAdmin };
