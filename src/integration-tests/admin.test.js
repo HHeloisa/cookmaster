@@ -9,7 +9,7 @@ const chaiHttp = require('chai-http');
 chai.use(chaiHttp);
 const { expect } = chai;
 
-describe('Valida a rota post /users/admin', () => {
+describe.only('Valida a rota post /users/admin', () => {
   let connectionMock;
 
   before(async () => {
@@ -20,13 +20,16 @@ describe('Valida a rota post /users/admin', () => {
   after(() => {
     MongoClient.connect.restore();
   });
-  describe.skip('Testa caso de sucesso na rota /users/admin', () => {
-    // teste falhando pois não está aceitando o login de um usuario criado via seed?
+  describe('Testa caso de sucesso na rota /users/admin', () => {
     let response;
 
     before(async () => {
+      const usersCollection = connectionMock.db('Cookmaster').collection('users');
+      const users = [
+        { name: 'admin', email: 'root@email.com', password: 'admin', role: 'admin' }
+      ];
+      await usersCollection.insertMany(users);
       const { body: { token } } = await chai.request(server).post('/login').send(adminUser);
-      console.log(body);
       response = await chai.request(server)
         .post('/users/admin')
         .set('Authorization', token)
@@ -97,4 +100,3 @@ describe('Valida a rota post /users/admin', () => {
     });
   });
 });
-
