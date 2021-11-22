@@ -242,7 +242,34 @@ describe('Testes da rota PUT /recipes', () => {
       done();
     });
   });
-  describe('Testas caso de erros em PUT /recipes', () => {    
+ /* ================================NÃO FINALIZADO=========================================== */
+  describe('Testas caso de erros em PUT /recipes', () => {  
+  /*    describe.skip('Com id errado, não encontra receita', () => {
+      let response;
+      before(async () => {
+        const wrongRecipeId = '14151615'
+        const { body: { token } } = await chai.request(server).post('/login').send(correctLogin);
+        const { body: { recipe: _id } } = await chai.request(server)
+        .post('/recipes')
+        .set('Authorization', token)
+        .send(recipe);
+        const { _id: recipeId  } = _id
+        response = await chai.request(server)
+        .put(`/recipes/${wrongRecipeId}`)
+        .set('Authorization', token)
+        .send(recipe);
+      });
+      it('Retorna status 404', (done) => {
+        expect(response).to.have.status(status.notFound);
+        done();
+      });
+      it('Retorna propriedade message com valor "recipe not found', (done) => {
+        expect(response.body).to.have.property('message');
+        expect(response.body.message).to.be.equal(recipesMessages.notFound);
+        done();
+      });
+    }); */
+    /* ================================^NÃO FINALIZADO=========================================== */
     describe('sem :id não encontra a rota', () => {
       let response;
       before(async () => {
