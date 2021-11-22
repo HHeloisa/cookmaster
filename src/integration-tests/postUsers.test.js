@@ -1,18 +1,13 @@
 const { MongoClient } = require('mongodb');
 const chai = require('chai');
 const sinon = require('sinon');
-
-const { getMockConnection } = require("./connectionMock");
+const { getMockConnection } = require('./connectionMock');
 const server = require('../api/app');
 const { status, usersMessages } = require('../messages');
 const { newUser, userWithoutEmail, userWithoutName, userWithoutPassW } = require('./helpersObjects');
-
-
 const chaiHttp = require('chai-http');
 chai.use(chaiHttp);
-
 const { expect } = chai;
-
 
 describe('Valida a rota post /users', () => {
   let connectionMock;
@@ -41,10 +36,8 @@ describe('Valida a rota post /users', () => {
       await usersCollection.deleteOne({
         email: 'hhackenhaar@gmail.com'
       });
-      console.log('deleteriusuario');
     })
     it('Espera que o retorno em body seja um objeto com a propriedade "user"', (done) => {
-      console.log(response.body)
       expect(response.body).to.be.an('object')
       expect(response.body).to.be.property('user');
       done();

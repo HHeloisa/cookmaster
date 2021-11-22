@@ -1,15 +1,12 @@
 const { MongoClient } = require('mongodb');
 const chai = require('chai');
 const sinon = require('sinon');
-
 const { getMockConnection } = require("./connectionMock");
 const server = require('../api/app');
 const { newUser, loginWithoutEmail, loginWithoutPassW, incorretLogin, correctLogin } = require('./helpersObjects');
 const { status, loginMessages } = require('../messages');
-
 const chaiHttp = require('chai-http');
 chai.use(chaiHttp);
-
 const { expect } = chai;
 
 describe('Valida a rota post /login', () => {

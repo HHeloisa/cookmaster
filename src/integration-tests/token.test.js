@@ -1,18 +1,14 @@
 const { MongoClient } = require('mongodb');
 const chai = require('chai');
 const sinon = require('sinon');
-
 const { getMockConnection } = require("./connectionMock");
 const server = require('../api/app');
 const { newUser, correctLogin, recipe } = require('./helpersObjects');
 const { status, authMessages } = require('../messages');
-
 const chaiHttp = require('chai-http');
+
 chai.use(chaiHttp);
-
 const { expect } = chai;
-
-
 
 describe('Sem token de autenticação, não é possível acessar rotas', () => {
   let connectionMock;

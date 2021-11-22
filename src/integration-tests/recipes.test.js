@@ -1,19 +1,12 @@
-/* É preciso refatorar estes testess porque nao os its nao devem fazer requisições
-nem ter done e resopnse juntos
-ver nos outros testes ja refatorados. */
-
 const { MongoClient } = require('mongodb');
 const chai = require('chai');
 const sinon = require('sinon');
-
 const { getMockConnection } = require("./connectionMock");
 const server = require('../api/app');
 const { status, recipesMessages, usersMessages } = require('../messages');
 const { newUser, correctLogin, recipe, reciperecipeWithoutName, recipeWithoutIngredients,
   recipeWithoutPreparation, 
   recipeWithoutName} = require('./helpersObjects');
-
-
 const chaiHttp = require('chai-http');
 chai.use(chaiHttp);
 
