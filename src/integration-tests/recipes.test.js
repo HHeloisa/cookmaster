@@ -60,6 +60,55 @@ describe('Testes da rota GET /recipes', () => {
   });
 })
 
+describe('Testa da rota GET recipes/id' , () => {
+  let connectionMock;
+  before(async () => {
+    connectionMock = await getMockConnection();
+    sinon.stub(MongoClient, 'connect')
+    .resolves(connectionMock);
+  });
+  after(async () => {
+    MongoClient.connect.restore();
+  });
+  describe('Testa caso de sucesso em buscar receita por Id', () => {
+    let response;
+    before(async () => {
+      const usersCollection = connectionMock.db('Cookmaster').collection('users');
+      await usersCollection.insertOne(newUser);
+      const { body: { token } } = await chai.request(server).post('/login').send(correctLogin);
+      const { body: { recipe: _id } } = await chai.request(server)
+      .post('/recipes')
+      .set('Authorization', token)
+      .send(recipe);
+      const { _id: recipeId } = _id;
+        response = await chai.request(server)
+          .get(`/recipes/${recipeId}`)
+          .set('Authorization', token);
+    })
+    it('busca pelas receitas, retorna status 200, e body contem um objeto "', (done) => {
+      expect(response).to.have.status(status.sucess);
+      expect(response.body).to.be.an('object')
+      done();
+    })
+    it('verifica se objeto contém: name', (done) => {
+      expect(response.body).to.be.property('name');
+      done();
+    });
+    it('verifica se objeto contém: ingredients', (done) => {
+      expect(response.body).to.be.property('ingredients')
+      done();
+    });
+    it('verifica se objeto contém: preparation', (done) => {
+      expect(response.body).to.be.property('preparation')
+      done();
+    });
+    it('verifica se objeto "recipe" contém: userId, e _id', (done) => {
+      expect(response.body).to.be.property('userId');
+      expect(response.body).to.be.property('_id');
+      done();
+    });
+  });
+});
 describe('Testes da rota POST /recipes', () => {
   let connectionMock;
   before(async () => {
@@ -225,9 +274,6 @@ describe('Testes da rota PUT /recipes', () => {
           preparation: '3 horas'
         });
     });
-    
-   
-    
     it('retorna status de 200, e um objeto', (done) => {
       expect(response).to.have.status(status.sucess);
       expect(response.body).to.be.an('object')
@@ -252,7 +298,6 @@ describe('Testes da rota PUT /recipes', () => {
         .post('/recipes')
         .set('Authorization', token)
         .send(recipe);
-        const { _id: recipeId  } = _id
         response = await chai.request(server)
         .put(`/recipes/${wrongRecipeId}`)
         .set('Authorization', token)
