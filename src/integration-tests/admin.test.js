@@ -41,8 +41,9 @@ describe('Valida a rota post /users/admin', () => {
         email: 'newAdm@email.com'
       });
     })
-    it('Retorna status 201', () => {
+    it('Retorna status 201', (done) => {
       expect(response).to.have.status(status.create);
+      done()
     });
     it('Espera que o retorno em body seja um objeto com a propriedade "user"', (done) => {
       expect(response.body).to.be.an('object')
@@ -90,7 +91,6 @@ describe('Valida a rota post /users/admin', () => {
       await usersCollection.deleteOne({ email: newUser.email });
     });
     it('verifica se retorna status "401"', (done) => {
-      console.log(response.body)
       expect(response).to.have.status(status.forbidden);
       done();
     });
