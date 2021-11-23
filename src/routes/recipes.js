@@ -25,23 +25,21 @@ router.delete('/:id',
   verifyAdminOrOwner,
   recepiesController.deleteRecipe);
 
-  /* ========================================================= */
-  const storage = multer.diskStorage({
-    destination: (_req, _file, callback) => {
-    callback(null, './src/uploads/');
-    },
-    filename: (req, _file, callback) => {
-      const { id } = req.params;
-      callback(null, `${id}.jpeg`);
-    },
-  });
+const storage = multer.diskStorage({
+  destination: (_req, _file, callback) => {
+  callback(null, './src/uploads/');
+  },
+  filename: (req, _file, callback) => {
+    const { id } = req.params;
+    callback(null, `${id}.jpeg`);
+  },
+});
 
-  const uploadImage = multer({ storage });
-
-  router.put('/:id/image/', 
-  verifyToken,
-  verifyAdminOrOwner,
-  uploadImage.single('image'),
-  recepiesController.addImage); 
+const uploadImage = multer({ storage });
+router.put('/:id/image/', 
+verifyToken,
+verifyAdminOrOwner,
+uploadImage.single('image'),
+recepiesController.addImage); 
 
 module.exports = router;

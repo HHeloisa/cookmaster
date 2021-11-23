@@ -140,9 +140,9 @@ describe('Testes da rota POST /recipes', () => {
     });
     after(async () => {
       const usersCollection = connectionMock.db('Cookmaster').collection('users');
+      const recipesCollection = connectionMock.db('Cookmaster').collection('recipes');
       await usersCollection.deleteOne({ email: newUser.email });
-     /*  const recipesCollection = connectionMock.db('Cookmaster').collection('recipes');
-      await recipesCollection.deleteOne({name: recipe.name}); */
+      await recipesCollection.deleteMany({});
     });
     it('adiciona uma receita, retorna status 201, e objeto "recipe"', (done) => {
       expect(response).to.have.status(201);
