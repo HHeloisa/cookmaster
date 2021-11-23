@@ -84,7 +84,14 @@ describe('Testa da rota GET recipes/id' , () => {
         response = await chai.request(server)
           .get(`/recipes/${recipeId}`)
           .set('Authorization', token);
-    })
+    });
+    after(async () => {
+    const recipeCollection = connectionMock.db('Cookmaster').collection('recipes');
+    const usersCollection = connectionMock.db('Cookmaster').collection('users');
+      await recipeCollection.deleteMany({});
+      await usersCollection.deleteMany({});
+    });
+
     it('busca pelas receitas, retorna status 200, e body contem um objeto "', (done) => {
       expect(response).to.have.status(status.sucess);
       expect(response.body).to.be.an('object')

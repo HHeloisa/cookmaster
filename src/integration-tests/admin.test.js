@@ -37,9 +37,7 @@ describe('Valida a rota post /users/admin', () => {
     })
     after(async () => {
       const usersCollection = connectionMock.db('Cookmaster').collection('users');
-      await usersCollection.deleteOne({
-        email: 'newAdm@email.com'
-      });
+      await usersCollection.deleteMany({});
     })
     it('Retorna status 201', (done) => {
       expect(response).to.have.status(status.create);
